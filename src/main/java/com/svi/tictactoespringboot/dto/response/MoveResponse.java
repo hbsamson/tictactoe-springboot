@@ -1,4 +1,5 @@
 package com.svi.tictactoespringboot.dto.response;
+
 import com.svi.tictactoespringboot.enums.PlayerSymbol;
 import java.time.Instant;
 import java.util.UUID;

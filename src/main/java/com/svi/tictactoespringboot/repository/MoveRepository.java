@@ -1,4 +1,5 @@
 package com.svi.tictactoespringboot.repository;
+
 import com.svi.tictactoespringboot.entity.Move;
 import com.svi.tictactoespringboot.entity.MoveKey;
 import org.springframework.data.cassandra.repository.CassandraRepository;

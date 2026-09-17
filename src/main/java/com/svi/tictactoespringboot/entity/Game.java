@@ -26,7 +26,9 @@ public class Game {
     private Instant updatedAt;
     private Instant completedAt;
     @Version private Long version;
+
     public Game() {}
+    
     public UUID getGameId() { return gameId; }
     public void setGameId(UUID v) { gameId = v; }
     public UUID getRoomId() { return roomId; }

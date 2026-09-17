@@ -13,7 +13,9 @@ public class Room {
     private UUID guestPlayerId;
     private int gameCount;
     private Instant createdAt;
+
     public Room() {}
+    
     public UUID getRoomId() { return roomId; }
     public void setRoomId(UUID v) { roomId = v; }
     public String getJoinCode() { return joinCode; }

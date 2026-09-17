@@ -6,8 +6,8 @@ public class ApiException extends RuntimeException {
 
     public ApiException(HttpStatus status, String code, String message) { 
         super(message); 
-        this.status=status; 
-        this.code=code; 
+        this.status = status;
+        this.code = code;
     }
 
     public HttpStatus getStatus() { return status; } public String getCode() { 

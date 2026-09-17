@@ -1,4 +1,5 @@
 package com.svi.tictactoespringboot.repository;
+
 import com.svi.tictactoespringboot.entity.GameReferenceKey;
 import com.svi.tictactoespringboot.entity.PlayerGame;
 import org.springframework.data.cassandra.repository.CassandraRepository;
