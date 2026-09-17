@@ -5,7 +5,8 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("games_by_room")
 public class RoomGame {
-    @PrimaryKey private GameReferenceKey key;
+    @PrimaryKey
+    private GameReferenceKey key;
 
     public RoomGame() {}
     public RoomGame(GameReferenceKey key) { this.key = key; }

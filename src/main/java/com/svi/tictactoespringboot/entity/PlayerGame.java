@@ -4,7 +4,8 @@ import org.springframework.data.cassandra.core.mapping.Table;
 
 @Table("games_by_player")
 public class PlayerGame {
-    @PrimaryKey private GameReferenceKey key;
+    @PrimaryKey
+    private GameReferenceKey key;
 
     public PlayerGame() {}
 

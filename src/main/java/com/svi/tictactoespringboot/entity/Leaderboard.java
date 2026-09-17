@@ -1,19 +1,26 @@
 package com.svi.tictactoespringboot.entity;
 
+import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 import java.util.UUID;
 
 @Table("leaderboard")
-public class LeaderboardEntry {
-    @PrimaryKey private UUID playerId;
+public class Leaderboard {
+    @PrimaryKey
+    @Column("player_id")
+    private UUID playerId;
+
+    @Column("player_name")
     private String playerName;
     private int wins;
     private int draws;
     private int losses;
     private int points;
-    public LeaderboardEntry() {}
-    public LeaderboardEntry(UUID id, String name) { playerId = id; playerName = name; }
+
+    public Leaderboard() {}
+    public Leaderboard(UUID id, String name) { playerId = id; playerName = name; }
+
     public UUID getPlayerId() { return playerId; }
     public void setPlayerId(UUID v) { playerId = v; }
     public String getPlayerName() { return playerName; }

@@ -7,7 +7,7 @@ import com.svi.tictactoespringboot.dto.response.GameStatusResponse;
 import com.svi.tictactoespringboot.dto.response.MoveResponse;
 import com.svi.tictactoespringboot.entity.Game;
 import com.svi.tictactoespringboot.entity.GameReferenceKey;
-import com.svi.tictactoespringboot.entity.LeaderboardEntry;
+import com.svi.tictactoespringboot.entity.Leaderboard;
 import com.svi.tictactoespringboot.entity.Move;
 import com.svi.tictactoespringboot.entity.MoveKey;
 import com.svi.tictactoespringboot.entity.PlayerGame;
@@ -224,17 +224,17 @@ public class GameServiceImpl implements GameService {
     }
 
     private void recordResult(Game game) {
-        LeaderboardEntry playerX = leaderboardEntry(game.getPlayerXId());
-        LeaderboardEntry playerO = leaderboardEntry(game.getPlayerOId());
+        Leaderboard playerX = leaderboardEntry(game.getPlayerXId());
+        Leaderboard playerO = leaderboardEntry(game.getPlayerOId());
         if (game.getStatus() == GameStatus.DRAW) {
             playerX.setDraws(playerX.getDraws() + 1);
             playerO.setDraws(playerO.getDraws() + 1);
             playerX.setPoints(playerX.getPoints() + 1);
             playerO.setPoints(playerO.getPoints() + 1);
         } else {
-            LeaderboardEntry winner =
+            Leaderboard winner =
                     game.getWinnerId().equals(playerX.getPlayerId()) ? playerX : playerO;
-            LeaderboardEntry loser = winner == playerX ? playerO : playerX;
+            Leaderboard loser = winner == playerX ? playerO : playerX;
             winner.setWins(winner.getWins() + 1);
             winner.setPoints(winner.getPoints() + 3);
             loser.setLosses(loser.getLosses() + 1);
@@ -243,7 +243,7 @@ public class GameServiceImpl implements GameService {
         leaderboard.save(playerO);
     }
 
-    private LeaderboardEntry leaderboardEntry(UUID playerId) {
+    private Leaderboard leaderboardEntry(UUID playerId) {
         return leaderboard
                 .findById(playerId)
                 .orElseGet(
@@ -255,7 +255,7 @@ public class GameServiceImpl implements GameService {
                                                     () ->
                                                             ApiException.notFound(
                                                                     "player", playerId));
-                            return new LeaderboardEntry(playerId, player.getName());
+                            return new Leaderboard(playerId, player.getName());
                         });
     }
 

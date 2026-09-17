@@ -3,6 +3,7 @@ package com.svi.tictactoespringboot.entity;
 import com.svi.tictactoespringboot.enums.GameStatus;
 import com.svi.tictactoespringboot.enums.PlayerSymbol;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 import java.time.Instant;
@@ -12,20 +13,46 @@ import java.util.UUID;
 
 @Table("games")
 public class Game {
-    @PrimaryKey private UUID gameId;
+    @PrimaryKey
+    @Column("game_id")
+    private UUID gameId;
+
+    @Column("room_id")
     private UUID roomId;
+
+    @Column("player_x_id")
     private UUID playerXId;
+
+    @Column("player_o_id")
     private UUID playerOId;
+
+    @Column("current_player_id")
     private UUID currentPlayerId;
+
+    @Column("current_symbol")
     private PlayerSymbol currentSymbol;
+
     private GameStatus status;
+
+    @Column("winner_id")
     private UUID winnerId;
+
     private List<String> board;
+
+    @Column("move_count")
     private int moveCount;
+
+    @Column("created_at")
     private Instant createdAt;
+
+    @Column("updated_at")
     private Instant updatedAt;
+
+    @Column("completed_at")
     private Instant completedAt;
-    @Version private Long version;
+
+    @Version
+    private Long version;
 
     public Game() {}
     
