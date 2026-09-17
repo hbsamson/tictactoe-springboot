@@ -1,0 +1,195 @@
+{
+  "info": {
+    "name": "Tic-Tac-Toe REST - Full Game Simulation",
+    "description": "Run in order. Creates X and O, exercises validation and business errors, plays a game won by X, verifies every GET path, and creates a rematch. IDs are captured automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key":"baseUrl","value":"http://localhost:8080/api/v1"},
+    {"key":"playerXId","value":""},{"key":"playerOId","value":""},
+    {"key":"roomId","value":""},{"key":"gameId","value":""},{"key":"rematchGameId","value":""},
+    {"key":"missingId","value":"00000000-0000-0000-0000-000000000001"},
+    {"key":"outsiderId","value":"00000000-0000-0000-0000-000000000002"}
+  ],
+  "item": [
+    {
+      "name": "01 - Create two players",
+      "item": [
+        {
+          "name": "Create Player X - Hannah",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Hannah\"\n}"},"url":"{{baseUrl}}/players"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('201 Created', () => pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.name).to.eql('Hannah');","pm.collectionVariables.set('playerXId', b.playerId);"]}}]
+        },
+        {
+          "name": "Create Player O - Patricia",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Patricia\"\n}"},"url":"{{baseUrl}}/players"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('201 Created', () => pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.name).to.eql('Patricia');","pm.collectionVariables.set('playerOId', b.playerId);"]}}]
+        },
+        {
+          "name": "Validation Test - blank name",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"name\":\"   \"}"},"url":"{{baseUrl}}/players"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('400 VALIDATION_FAILED',()=>pm.response.to.have.status(400));","const b=pm.response.json(); pm.expect(b.code).to.eql('VALIDATION_FAILED'); pm.expect(b.fieldErrors.some(e=>e.field==='name')).to.be.true;"]}}]
+        },
+        {
+          "name": "Validation Test - malformed JSON",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"name\":\"broken\""},"url":"{{baseUrl}}/players"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('400 MALFORMED_REQUEST',()=>pm.response.to.have.status(400));","pm.expect(pm.response.json().code).to.eql('MALFORMED_REQUEST');"]}}]
+        },
+        {
+          "name": "List players",
+          "request": {"method":"GET","url":"{{baseUrl}}/players"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('both players listed',()=>pm.response.to.have.status(200));","const ids=pm.response.json().map(p=>p.playerId); pm.expect(ids).to.include.members([pm.collectionVariables.get('playerXId'),pm.collectionVariables.get('playerOId')]);"]}}]
+        },
+        {
+          "name": "Get Player X",
+          "request": {"method":"GET","url":"{{baseUrl}}/players/{{playerXId}}"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('Player X returned',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().playerId).to.eql(pm.collectionVariables.get('playerXId'));"]}}]
+        },
+        {
+          "name": "Unhappy - player not found",
+          "request": {"method":"GET","url":"{{baseUrl}}/players/{{missingId}}"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('404 PLAYER_NOT_FOUND',()=>pm.response.to.have.status(404));","pm.expect(pm.response.json().code).to.eql('PLAYER_NOT_FOUND');"]}}]
+        },
+        {
+          "name": "Validation Test - invalid player UUID",
+          "request": {"method":"GET","url":"{{baseUrl}}/players/not-a-uuid"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('400 INVALID_PATH_VALUE',()=>pm.response.to.have.status(400));","pm.expect(pm.response.json().code).to.eql('INVALID_PATH_VALUE');"]}}]
+        }
+      ]
+    },
+    {
+      "name": "02 - Room Setup",
+      "item": [
+        {
+          "name": "Validation Test - missing hostPlayerId",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{}"},"url":"{{baseUrl}}/rooms"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('400 VALIDATION_FAILED',()=>pm.response.to.have.status(400));","pm.expect(pm.response.json().code).to.eql('VALIDATION_FAILED');"]}}]
+        },
+        {
+          "name": "Unhappy - invalid host playerId",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"hostPlayerId\":\"{{missingId}}\"}"},"url":"{{baseUrl}}/rooms"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('404 PLAYER_NOT_FOUND',()=>pm.response.to.have.status(404));","pm.expect(pm.response.json().code).to.eql('PLAYER_NOT_FOUND');"]}}]
+        },
+        {
+          "name": "Create room - Player X hosts",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"hostPlayerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('201 room created',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.hostPlayerId).to.eql(pm.collectionVariables.get('playerXId')); pm.expect(b.guestPlayerId).to.be.null;","pm.collectionVariables.set('roomId',b.roomId);"]}}]
+        },
+        {
+          "name": "Unhappy - game before O joins",
+          "request": {"method":"POST","url":"{{baseUrl}}/rooms/{{roomId}}/games"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('409 ROOM_NOT_READY',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('ROOM_NOT_READY');"]}}]
+        },
+        {
+          "name": "Unhappy - host joins own room",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomId}}/join"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('409 HOST_CANNOT_JOIN',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('HOST_CANNOT_JOIN');"]}}]
+        },
+        {
+          "name": "Player O joins",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomId}}/join"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('Player O joined',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().guestPlayerId).to.eql(pm.collectionVariables.get('playerOId'));"]}}]
+        },
+        {
+          "name": "Get room",
+          "request": {"method":"GET","url":"{{baseUrl}}/rooms/{{roomId}}"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('room returned',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().roomId).to.eql(pm.collectionVariables.get('roomId'));"]}}]
+        },
+        {
+          "name": "List rooms",
+          "request": {"method":"GET","url":"{{baseUrl}}/rooms"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('room listed',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(r=>r.roomId===pm.collectionVariables.get('roomId'))).to.be.true;"]}}]
+        }
+      ]
+    },
+    {
+      "name": "03 - Play game - X wins",
+      "item": [
+        {
+          "name": "Create game",
+          "request": {"method":"POST","url":"{{baseUrl}}/rooms/{{roomId}}/games"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('201 X starts',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.status).to.eql('IN_PROGRESS'); pm.expect(b.currentSymbol).to.eql('X'); pm.expect(b.currentPlayerId).to.eql(pm.collectionVariables.get('playerXId'));","pm.collectionVariables.set('gameId',b.gameId);"]}}]
+        },
+        {
+          "name": "Unhappy - O moves out of turn",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('409 OUT_OF_TURN',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('OUT_OF_TURN');"]}}]
+        },
+        {
+          "name": "Unhappy - outsider moves",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{outsiderId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('409 PLAYER_NOT_IN_GAME',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('PLAYER_NOT_IN_GAME');"]}}]
+        },
+        {
+          "name": "Validation Test - coordinates out of range",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":3,\"y\":-1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('400 invalid coordinates',()=>pm.response.to.have.status(400));","const b=pm.response.json(); pm.expect(b.code).to.eql('VALIDATION_FAILED'); pm.expect(b.fieldErrors.map(e=>e.field)).to.include.members(['x','y']);"]}}]
+        },
+        {
+          "name": "Move 1 - X (0,0)",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('X move accepted',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.moveCount).to.eql(1); pm.expect(b.board[0]).to.eql('X'); pm.expect(b.currentSymbol).to.eql('O');"]}}]
+        },
+        {
+          "name": "Unhappy - occupied cell",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('409 CELL_OCCUPIED',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('CELL_OCCUPIED');"]}}]
+        },
+        {
+          "name": "Move 2 - O (0,1)",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('O move accepted',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().moveCount).to.eql(2);"]}}]
+        },
+        {
+          "name": "Move 3 - X (1,0)",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":1,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('X move accepted',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().moveCount).to.eql(3);"]}}]
+        },
+        {
+          "name": "Move 4 - O (1,1)",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":1,\"y\":1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('O move accepted',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().moveCount).to.eql(4);"]}}]
+        },
+        {
+          "name": "Move 5 - X (2,0) wins",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":2,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('X wins',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.status).to.eql('WON'); pm.expect(b.winnerId).to.eql(pm.collectionVariables.get('playerXId')); pm.expect(b.board.slice(0,3)).to.eql(['X','X','X']);"]}}]
+        },
+        {
+          "name": "Unhappy - move after completion",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":2,\"y\":2}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('409 GAME_NOT_ACTIVE',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('GAME_NOT_ACTIVE');"]}}]
+        }
+      ]
+    },
+    {
+      "name": "04 - Verify all read paths",
+      "item": [
+        {"name":"Get game","request":{"method":"GET","url":"{{baseUrl}}/games/{{gameId}}"},"event":[{"listen":"test","script":{"exec":["pm.test('game is WON',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().status).to.eql('WON');"]}}]},
+        {"name":"Get board","request":{"method":"GET","url":"{{baseUrl}}/games/{{gameId}}/board"},"event":[{"listen":"test","script":{"exec":["pm.test('winning board',()=>pm.response.to.have.status(200));","const c=pm.response.json().cells; pm.expect(c).to.have.length(9); pm.expect(c.slice(0,3)).to.eql(['X','X','X']);"]}}]},
+        {"name":"Get status","request":{"method":"GET","url":"{{baseUrl}}/games/{{gameId}}/status"},"event":[{"listen":"test","script":{"exec":["pm.test('X is winner',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.status).to.eql('WON'); pm.expect(b.winnerId).to.eql(pm.collectionVariables.get('playerXId'));"]}}]},
+        {"name":"Get moves","request":{"method":"GET","url":"{{baseUrl}}/games/{{gameId}}/moves"},"event":[{"listen":"test","script":{"exec":["pm.test('five ordered moves',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b).to.have.length(5); pm.expect(b.map(m=>m.moveNumber)).to.eql([1,2,3,4,5]);"]}}]},
+        {"name":"Player X games","request":{"method":"GET","url":"{{baseUrl}}/players/{{playerXId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('X history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
+        {"name":"Player O games","request":{"method":"GET","url":"{{baseUrl}}/players/{{playerOId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('O history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
+        {"name":"Room games","request":{"method":"GET","url":"{{baseUrl}}/rooms/{{roomId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('room history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
+        {"name":"Leaderboard","request":{"method":"GET","url":"{{baseUrl}}/leaderboard"},"event":[{"listen":"test","script":{"exec":["pm.test('X gets 3 points; O gets a loss',()=>pm.response.to.have.status(200));","const e=pm.response.json().entries,x=e.find(v=>v.playerId===pm.collectionVariables.get('playerXId')),o=e.find(v=>v.playerId===pm.collectionVariables.get('playerOId')); pm.expect(x.wins).to.eql(1); pm.expect(x.points).to.eql(3); pm.expect(o.losses).to.eql(1);"]}}]},
+        {"name":"Unhappy - game not found","request":{"method":"GET","url":"{{baseUrl}}/games/{{missingId}}"},"event":[{"listen":"test","script":{"exec":["pm.test('404 GAME_NOT_FOUND',()=>pm.response.to.have.status(404));","pm.expect(pm.response.json().code).to.eql('GAME_NOT_FOUND');"]}}]}
+      ]
+    },
+    {
+      "name": "05 - Rematch",
+      "item": [
+        {
+          "name": "Create rematch",
+          "request": {"method":"POST","url":"{{baseUrl}}/games/{{gameId}}/rematches"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('201 fresh game',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.gameId).to.not.eql(pm.collectionVariables.get('gameId')); pm.expect(b.status).to.eql('IN_PROGRESS'); pm.expect(b.currentPlayerId).to.eql(pm.collectionVariables.get('playerXId'));","pm.collectionVariables.set('rematchGameId',b.gameId);"]}}]
+        },
+        {
+          "name": "Verify rematch board",
+          "request": {"method":"GET","url":"{{baseUrl}}/games/{{rematchGameId}}/board"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('empty rematch board',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().cells).to.eql(['','','','','','','','','']);"]}}]
+        }
+      ]
+    }
+  ]
+}
