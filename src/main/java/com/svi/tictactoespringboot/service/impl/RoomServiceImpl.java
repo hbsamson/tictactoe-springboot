@@ -33,18 +33,18 @@ public class RoomServiceImpl implements RoomService {
         room.setHostPlayerId(r.hostPlayerId());
         room.setJoinCode(room.getRoomId().toString().substring(0,6).toUpperCase(Locale.ROOT));
         room.setCreatedAt(Instant.now());
-        return roomMapper.toResponse(rooms.save(room));
+        return toResponse(rooms.save(room));
     }
 
     public List<RoomResponse> list() {
         var result=new ArrayList<RoomResponse>();
-        rooms.findAll().forEach(x->result.add(roomMapper.toResponse(x)));
+        rooms.findAll().forEach(x->result.add(toResponse(x)));
         result.sort(Comparator.comparing(RoomResponse::createdAt).reversed());
         return result;
     }
 
     public RoomResponse get(UUID id) {
-        return roomMapper.toResponse(find(id));
+        return toResponse(find(id));
     }
 
     public RoomResponse join(UUID id, JoinRoomRequest r) {
@@ -52,7 +52,7 @@ public class RoomServiceImpl implements RoomService {
         requirePlayer(r.playerId());
         if (r.playerId().equals(room.getHostPlayerId())) throw ApiException.conflict("HOST_CANNOT_JOIN","Host is already in the room");
         if (room.getGuestPlayerId()!=null && !room.getGuestPlayerId().equals(r.playerId())) throw ApiException.conflict("ROOM_FULL","Room already has two players");
-        room.setGuestPlayerId(r.playerId()); return roomMapper.toResponse(rooms.save(room));
+        room.setGuestPlayerId(r.playerId()); return toResponse(rooms.save(room));
     }
 
     public List<GameResponse> games(UUID id) {
@@ -62,6 +62,11 @@ public class RoomServiceImpl implements RoomService {
 
     private Room find(UUID id) {
         return rooms.findById(id).orElseThrow(()->ApiException.notFound("room",id));
+    }
+
+    private RoomResponse toResponse(Room room) {
+        int gameCount = histories.findByKeyOwnerId(room.getRoomId()).size();
+        return roomMapper.toResponse(room, gameCount);
     }
 
     private void requirePlayer(UUID id) {

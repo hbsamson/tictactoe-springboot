@@ -159,9 +159,8 @@ public class GameServiceImpl implements GameService {
                     "ROOM_NOT_READY", "Room requires two players before a game can start");
         }
 
-        boolean hostStarts = room.getGameCount() % 2 == 0;
-        UUID playerX = hostStarts ? room.getHostPlayerId() : room.getGuestPlayerId();
-        UUID playerO = hostStarts ? room.getGuestPlayerId() : room.getHostPlayerId();
+        UUID playerX = room.getHostPlayerId();
+        UUID playerO = room.getGuestPlayerId();
         Instant createdAt = Instant.now();
 
         Game game = new Game();
@@ -183,8 +182,6 @@ public class GameServiceImpl implements GameService {
                 new PlayerGame(new GameReferenceKey(playerX, createdAt, saved.getGameId())));
         playerGames.save(
                 new PlayerGame(new GameReferenceKey(playerO, createdAt, saved.getGameId())));
-        room.setGameCount(room.getGameCount() + 1);
-        rooms.save(room);
         return saved;
     }
 

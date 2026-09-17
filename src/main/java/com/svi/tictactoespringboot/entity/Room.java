@@ -18,11 +18,8 @@ public class Room {
     @Column("host_player_id")
     private UUID hostPlayerId;
 
-    @Column("host_player_id")
+    @Column("guest_player_id")
     private UUID guestPlayerId;
-
-    @Column("game_count")
-    private int gameCount;
 
     @Column("created_at")
     private Instant createdAt;
@@ -37,8 +34,6 @@ public class Room {
     public void setHostPlayerId(UUID v) { hostPlayerId = v; }
     public UUID getGuestPlayerId() { return guestPlayerId; }
     public void setGuestPlayerId(UUID v) { guestPlayerId = v; }
-    public int getGameCount() { return gameCount; }
-    public void setGameCount(int v) { gameCount = v; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant v) { createdAt = v; }
 }
