@@ -10,7 +10,6 @@ public class PlayerMapper {
         return new PlayerResponse(
                 player.getPlayerId(),
                 player.getName(), 
-                player.getAvatarUrl(),
                 player.getCreatedAt()); 
     } 
 }
