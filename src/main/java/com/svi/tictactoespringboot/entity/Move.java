@@ -7,7 +7,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 import java.time.Instant;
 import java.util.UUID;
 
-@Table("moves_by_game")
+@Table("moves")
 public class Move {
     @PrimaryKey
     private MoveKey key;
