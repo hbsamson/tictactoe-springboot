@@ -35,9 +35,11 @@ import org.springframework.stereotype.Service;
 public class GameServiceImpl implements GameService {
     private static final List<String> EMPTY_BOARD =
             List.of("", "", "", "", "", "", "", "", "");
+
     private static final int[][] WINNING_LINES = {
-        {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {0, 3, 6},
-        {1, 4, 7}, {2, 5, 8}, {0, 4, 8}, {2, 4, 6}
+            {0, 1, 2}, {3, 4, 5}, {6, 7, 8}, // horizontal
+            {0, 3, 6}, {1, 4, 7}, {2, 5, 8}, // vertical
+            {0, 4, 8}, {2, 4, 6} // diagonal
     };
 
     private final GameRepository games;
@@ -120,14 +122,14 @@ public class GameServiceImpl implements GameService {
         advanceGame(game, request.playerId(), playedSymbol, playedAt);
 
         Game saved = games.save(game);
-        moves.save(
-                new Move(
-                        new MoveKey(gameId, saved.getMoveCount()),
-                        request.playerId(),
-                        playedSymbol,
-                        request.x(),
-                        request.y(),
-                        playedAt));
+        moves.save(new Move(
+                    new MoveKey(gameId, saved.getMoveCount()),
+                    request.playerId(),
+                    playedSymbol,
+                    request.x(),
+                    request.y(),
+                    playedAt)
+        );
 
         if (saved.getStatus() == GameStatus.WON || saved.getStatus() == GameStatus.DRAW) {
             recordResult(saved);
@@ -151,8 +153,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private Game create(UUID roomId) {
-        var room =
-                rooms.findById(roomId).orElseThrow(() -> ApiException.notFound("room", roomId));
+        var room = rooms.findById(roomId).orElseThrow(() -> ApiException.notFound("room", roomId));
         if (room.getGuestPlayerId() == null) {
             throw ApiException.conflict(
                     "ROOM_NOT_READY", "Room requires two players before a game can start");
@@ -203,8 +204,7 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    private void advanceGame(
-            Game game, UUID playerId, PlayerSymbol playedSymbol, Instant playedAt) {
+    private void advanceGame(Game game, UUID playerId, PlayerSymbol playedSymbol, Instant playedAt) {
         if (hasWon(game.getBoard(), playedSymbol)) {
             game.setStatus(GameStatus.WON);
             game.setWinnerId(playerId);
@@ -232,8 +232,7 @@ public class GameServiceImpl implements GameService {
             playerX.setPoints(playerX.getPoints() + 1);
             playerO.setPoints(playerO.getPoints() + 1);
         } else {
-            Leaderboard winner =
-                    game.getWinnerId().equals(playerX.getPlayerId()) ? playerX : playerO;
+            Leaderboard winner = game.getWinnerId().equals(playerX.getPlayerId()) ? playerX : playerO;
             Leaderboard loser = winner == playerX ? playerO : playerX;
             winner.setWins(winner.getWins() + 1);
             winner.setPoints(winner.getPoints() + 3);
