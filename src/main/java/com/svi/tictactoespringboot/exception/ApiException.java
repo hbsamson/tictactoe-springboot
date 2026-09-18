@@ -1,4 +1,5 @@
 package com.svi.tictactoespringboot.exception;
+import com.svi.tictactoespringboot.constants.ResponseMessage;
 import org.springframework.http.HttpStatus;
 
 public class ApiException extends RuntimeException {
@@ -14,11 +15,11 @@ public class ApiException extends RuntimeException {
         return code; 
     }
 
-    public static ApiException notFound(String resource, Object id) { 
-        return new ApiException(HttpStatus.NOT_FOUND, resource.toUpperCase() + "_NOT_FOUND", resource + " not found: " + id); 
+    public static ApiException notFound(ResponseMessage response, Object id) {
+        return new ApiException(HttpStatus.NOT_FOUND, response.name(), response.format(id));
     }
     
-    public static ApiException conflict(String code, String message) { 
-        return new ApiException(HttpStatus.CONFLICT, code, message); 
+    public static ApiException conflict(ResponseMessage response) {
+        return new ApiException(HttpStatus.CONFLICT, response.name(), response.getValue());
     }
 }

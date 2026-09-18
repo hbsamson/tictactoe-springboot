@@ -9,6 +9,7 @@ import com.svi.tictactoespringboot.service.PlayerService;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.*;
+import static com.svi.tictactoespringboot.constants.ResponseMessage.PLAYER_NOT_FOUND;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -50,10 +51,7 @@ public class PlayerServiceImpl implements PlayerService {
      }
 
      private Player find(UUID id) {
-         return players.findById(id).orElseThrow(()->ApiException.notFound("player",id));
+         return players.findById(id).orElseThrow(()->ApiException.notFound(PLAYER_NOT_FOUND,id));
      }
 
-     private String normalize(String value) {
-         return value == null || value.isBlank() ? null : value.trim();
-     }
 }

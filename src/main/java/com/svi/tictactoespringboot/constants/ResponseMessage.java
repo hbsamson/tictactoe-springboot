@@ -1,26 +1,32 @@
 package com.svi.tictactoespringboot.constants;
 
 public enum ResponseMessage {
-    // create game
+    // Request validation
+    VALIDATION_FAILED("Request validation failed"),
+    MALFORMED_REQUEST("Request body is malformed"),
+    INVALID_PATH_VALUE("Invalid value for %s"),
 
+    // Missing resources
+    PLAYER_NOT_FOUND("Player not found: %s"),
+    ROOM_NOT_FOUND("Room not found: %s"),
+    GAME_NOT_FOUND("Game not found: %s"),
 
-    RECORD_NOT_SAVED("Record could not be saved"),
-    LOCATION_OCCUPIED("Location is already occupied."),
-    RECORD_SAVED("Record saved"),
-    INVALID_GAME_ID("Invalid gameId format"),
-    RECORDS_FOUND("Records found"),
-    GAME_NOT_FOUND("Game record not found"),
-    INVALID_PLAYER_ID("Invalid playerId format"),
-    PLAYER_NOT_FOUND("Player ID not found"),
-    PLAYER_GAMES_FOUND("Player games records found"),
-    INVALID_ROOM_ID("Invalid roomId format"),
-    INVALID_GAME_IDS("Invalid gameIds format"),
-    ROOM_GAMES_SAVED("Room games saved"),
-    SERVER_ERROR("The server ran into an unexpected exception"),
+    // Room rules
+    HOST_CANNOT_JOIN("Host is already in the room"),
+    ROOM_FULL("Room already has two players"),
+    ROOM_NOT_READY("Room requires two players before a game can start"),
 
-    // invalid room code
-    INVALID_ROOM_CODE("Invalid room code."),
-    ROOM_NOT_FOUND("Room record not found");
+    // Game rules
+    CELL_OCCUPIED("Board cell is already occupied"),
+    GAME_NOT_ACTIVE("Game is no longer in progress"),
+    PLAYER_NOT_IN_GAME("Player is not a member of this game"),
+    OUT_OF_TURN("It is not this player's turn"),
+
+    // Concurrency
+    GAME_STATE_CHANGED("Game changed while the move was being processed"),
+
+    // Server errors
+    INTERNAL_ERROR("An unexpected error occurred");
 
     private final String value;
 
@@ -30,6 +36,10 @@ public enum ResponseMessage {
 
     public String getValue() {
         return value;
+    }
+
+    public String format(Object... arguments) {
+        return value.formatted(arguments);
     }
 }
 

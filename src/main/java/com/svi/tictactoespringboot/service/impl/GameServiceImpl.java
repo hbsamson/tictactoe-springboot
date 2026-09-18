@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
+import static com.svi.tictactoespringboot.constants.ResponseMessage.*;
+
 @Service
 public class GameServiceImpl implements GameService {
     private static final List<String> EMPTY_BOARD =
@@ -110,7 +112,7 @@ public class GameServiceImpl implements GameService {
         int cell = request.y() * 3 + request.x();
         List<String> board = new ArrayList<>(game.getBoard());
         if (!board.get(cell).isEmpty()) {
-            throw ApiException.conflict("CELL_OCCUPIED", "Board cell is already occupied");
+            throw ApiException.conflict(CELL_OCCUPIED);
         }
 
         PlayerSymbol playedSymbol = game.getCurrentSymbol();
@@ -153,10 +155,9 @@ public class GameServiceImpl implements GameService {
     }
 
     private Game create(UUID roomId) {
-        var room = rooms.findById(roomId).orElseThrow(() -> ApiException.notFound("room", roomId));
+        var room = rooms.findById(roomId).orElseThrow(() -> ApiException.notFound(ROOM_NOT_FOUND, roomId));
         if (room.getGuestPlayerId() == null) {
-            throw ApiException.conflict(
-                    "ROOM_NOT_READY", "Room requires two players before a game can start");
+            throw ApiException.conflict(ROOM_NOT_READY);
         }
 
         UUID playerX = room.getHostPlayerId();
@@ -187,17 +188,16 @@ public class GameServiceImpl implements GameService {
 
     private void validateMove(Game game, MakeMoveRequest request) {
         if (game.getStatus() != GameStatus.IN_PROGRESS) {
-            throw ApiException.conflict("GAME_NOT_ACTIVE", "Game is no longer in progress");
+            throw ApiException.conflict(GAME_NOT_ACTIVE);
         }
         boolean member =
                 request.playerId().equals(game.getPlayerXId())
                         || request.playerId().equals(game.getPlayerOId());
         if (!member) {
-            throw ApiException.conflict(
-                    "PLAYER_NOT_IN_GAME", "Player is not a member of this game");
+            throw ApiException.conflict(PLAYER_NOT_IN_GAME);
         }
         if (!request.playerId().equals(game.getCurrentPlayerId())) {
-            throw ApiException.conflict("OUT_OF_TURN", "It is not this player's turn");
+            throw ApiException.conflict(OUT_OF_TURN);
         }
     }
 
@@ -247,13 +247,13 @@ public class GameServiceImpl implements GameService {
                                             .orElseThrow(
                                                     () ->
                                                             ApiException.notFound(
-                                                                    "player", playerId));
+                                                                    PLAYER_NOT_FOUND, playerId));
                             return new Leaderboard(playerId, player.getName());
                         });
     }
 
     private Game find(UUID gameId) {
-        return games.findById(gameId).orElseThrow(() -> ApiException.notFound("game", gameId));
+        return games.findById(gameId).orElseThrow(() -> ApiException.notFound(GAME_NOT_FOUND, gameId));
     }
 
     private boolean hasWon(List<String> board, PlayerSymbol symbol) {

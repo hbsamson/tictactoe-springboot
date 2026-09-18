@@ -9,6 +9,7 @@ import com.svi.tictactoespringboot.service.RoomService;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.*;
+import static com.svi.tictactoespringboot.constants.ResponseMessage.*;
 @Service
 public class RoomServiceImpl implements RoomService {
     private final RoomRepository rooms;
@@ -50,8 +51,8 @@ public class RoomServiceImpl implements RoomService {
     public RoomResponse join(UUID id, JoinRoomRequest r) {
         var room=find(id);
         requirePlayer(r.playerId());
-        if (r.playerId().equals(room.getHostPlayerId())) throw ApiException.conflict("HOST_CANNOT_JOIN","Host is already in the room");
-        if (room.getGuestPlayerId()!=null && !room.getGuestPlayerId().equals(r.playerId())) throw ApiException.conflict("ROOM_FULL","Room already has two players");
+        if (r.playerId().equals(room.getHostPlayerId())) throw ApiException.conflict(HOST_CANNOT_JOIN);
+        if (room.getGuestPlayerId()!=null && !room.getGuestPlayerId().equals(r.playerId())) throw ApiException.conflict(ROOM_FULL);
         room.setGuestPlayerId(r.playerId()); return toResponse(rooms.save(room));
     }
 
@@ -61,7 +62,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private Room find(UUID id) {
-        return rooms.findById(id).orElseThrow(()->ApiException.notFound("room",id));
+        return rooms.findById(id).orElseThrow(()->ApiException.notFound(ROOM_NOT_FOUND,id));
     }
 
     private RoomResponse toResponse(Room room) {
@@ -69,6 +70,6 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private void requirePlayer(UUID id) {
-        if (!players.existsById(id)) throw ApiException.notFound("player",id);
+        if (!players.existsById(id)) throw ApiException.notFound(PLAYER_NOT_FOUND,id);
     }
 }
