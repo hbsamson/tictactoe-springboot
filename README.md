@@ -275,6 +275,22 @@ All request/response bodies are JSON and all routes use `/api/v1`.
 | `POST` | `/games/{gameId}/rematches` | Create a new game in the room | `201` |
 | `GET` | `/leaderboard` | Ranked score entries | `200` |
 
+### Real-time STOMP updates
+
+Connect a STOMP client to the native WebSocket endpoint `ws://localhost:8080/ws`, then
+subscribe to the destinations needed by the current screen:
+
+| Destination | Payload | Published when |
+|---|---|---|
+| `/topic/lobby` | JSON array of `RoomResponse` objects | A room is created, joined, or its first game starts |
+| `/topic/games/{gameId}/board` | Complete `GameResponse` snapshot | A game starts, a move is accepted, or a rematch changes the old/new game |
+| `/topic/leaderboard` | `LeaderboardResponse` | A game ends in a win or draw |
+
+The REST endpoints remain the source for commands and initial state. Subscribe first,
+then fetch the corresponding REST resource so an update cannot be missed while the
+screen is loading. Browser origins for both REST and WebSocket handshakes use the
+`FRONTEND_URLS` setting.
+
 Example request bodies:
 
 ```json
@@ -411,7 +427,7 @@ There is no reliable disconnect signal in a stateless REST/Postman workflow. Ins
 ### Current scope
 
 - No authentication: `playerId` is caller-supplied identity.
-- WebSockets are deferred; response DTOs can later become event payloads.
+- STOMP uses Spring's in-memory simple broker; multi-instance deployment requires a shared broker relay.
 - No pagination; list/leaderboard reads target demonstration-scale data.
 - Short room keys are reserved atomically, while UUIDs remain the internal permanent identifiers.
 - No migration tool; `schema.cql` is the clean/current installation schema.

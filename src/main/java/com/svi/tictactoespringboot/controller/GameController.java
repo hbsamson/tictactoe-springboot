@@ -8,6 +8,9 @@ import com.svi.tictactoespringboot.dto.response.GameStatusResponse;
 import com.svi.tictactoespringboot.dto.response.MoveResponse;
 import com.svi.tictactoespringboot.service.GameService;
 import com.svi.tictactoespringboot.service.RoomService;
+import com.svi.tictactoespringboot.service.LeaderboardService;
+import com.svi.tictactoespringboot.service.RealtimeUpdatePublisher;
+import com.svi.tictactoespringboot.enums.GameStatus;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,17 +24,25 @@ import java.util.UUID;
 public class GameController {
     private final GameService gameService;
     private final RoomService roomService;
+    private final LeaderboardService leaderboardService;
+    private final RealtimeUpdatePublisher realtimeUpdates;
 
-    public GameController(GameService gameService, RoomService roomService) {
+    public GameController(GameService gameService, RoomService roomService,
+            LeaderboardService leaderboardService, RealtimeUpdatePublisher realtimeUpdates) {
         this.gameService = gameService;
         this.roomService = roomService;
+        this.leaderboardService = leaderboardService;
+        this.realtimeUpdates = realtimeUpdates;
     }
 
     @PostMapping("/rooms/{roomKey}/games")
     public ResponseEntity<GameResponse> createGame(
             @PathVariable String roomKey, @Valid @RequestBody StartGameRequest request) {
         UUID roomId = roomService.requireActiveRoom(roomKey, request.playerId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(gameService.createGame(roomId));
+        GameResponse game = gameService.createGame(roomId);
+        realtimeUpdates.publishLobby(roomService.listRooms());
+        realtimeUpdates.publishBoard(game);
+        return ResponseEntity.status(HttpStatus.CREATED).body(game);
     }
 
     @GetMapping("/games/{gameId}")
@@ -56,11 +67,19 @@ public class GameController {
 
     @PostMapping("/games/{gameId}/moves")
     public GameResponse makeMove(@PathVariable UUID gameId, @Valid @RequestBody MakeMoveRequest request) {
-        return gameService.makeMove(gameId, request);
+        GameResponse game = gameService.makeMove(gameId, request);
+        realtimeUpdates.publishBoard(game);
+        if (game.status() == GameStatus.WON || game.status() == GameStatus.DRAW) {
+            realtimeUpdates.publishLeaderboard(leaderboardService.getLeaderboard());
+        }
+        return game;
     }
 
     @PostMapping("/games/{gameId}/rematches")
     public ResponseEntity<GameResponse> createRematch(@PathVariable UUID gameId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(gameService.createRematch(gameId));
+        GameResponse game = gameService.createRematch(gameId);
+        realtimeUpdates.publishBoard(gameService.getGame(gameId));
+        realtimeUpdates.publishBoard(game);
+        return ResponseEntity.status(HttpStatus.CREATED).body(game);
     }
 }
