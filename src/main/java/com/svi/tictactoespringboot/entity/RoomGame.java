@@ -9,8 +9,16 @@ public class RoomGame {
     private GameReferenceKey key;
 
     public RoomGame() {}
-    public RoomGame(GameReferenceKey key) { this.key = key; }
 
-    public GameReferenceKey getKey() { return key; }
-    public void setKey(GameReferenceKey v) { key = v; }
+    public RoomGame(GameReferenceKey key) {
+        this.key = key;
+    }
+
+    public GameReferenceKey getKey() {
+        return key;
+    }
+
+    public void setKey(GameReferenceKey key) {
+        this.key = key;
+    }
 }

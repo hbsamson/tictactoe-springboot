@@ -82,6 +82,4 @@ public class Game {
     public void setUpdatedAt(Instant v) { updatedAt = v; }
     public Instant getCompletedAt() { return completedAt; }
     public void setCompletedAt(Instant v) { completedAt = v; }
-    public Long getVersion() { return version; }
-    public void setVersion(Long v) { version = v; }
 }

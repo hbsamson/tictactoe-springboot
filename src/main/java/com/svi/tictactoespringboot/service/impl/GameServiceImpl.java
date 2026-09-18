@@ -241,13 +241,9 @@ public class GameServiceImpl implements GameService {
                 .findById(playerId)
                 .orElseGet(
                         () -> {
-                            var player =
-                                    players
-                                            .findById(playerId)
-                                            .orElseThrow(
-                                                    () ->
-                                                            ApiException.notFound(
-                                                                    PLAYER_NOT_FOUND, playerId));
+                            var player = players.findById(playerId)
+                                                .orElseThrow(
+                                                    () -> ApiException.notFound(PLAYER_NOT_FOUND, playerId));
                             return new Leaderboard(playerId, player.getName());
                         });
     }
