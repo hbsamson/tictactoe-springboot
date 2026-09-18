@@ -16,7 +16,6 @@ public class Leaderboard {
     private int wins;
     private int draws;
     private int losses;
-    private int points;
 
     public Leaderboard() {}
     public Leaderboard(UUID id, String name) { playerId = id; playerName = name; }
@@ -31,6 +30,4 @@ public class Leaderboard {
     public void setDraws(int v) { draws = v; }
     public int getLosses() { return losses; }
     public void setLosses(int v) { losses = v; }
-    public int getPoints() { return points; }
-    public void setPoints(int v) { points = v; }
 }
