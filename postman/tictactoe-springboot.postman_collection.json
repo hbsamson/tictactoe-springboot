@@ -67,7 +67,7 @@
       ]
     },
     {
-      "name": "02 - Room Setup",
+      "name": "[02] - Room Setup",
       "description": "Creates a waiting room, joins a guest, and exercises room validation, lifecycle, and host-only start rules.",
       "item": [
         {
@@ -127,7 +127,7 @@
       ]
     },
     {
-      "name": "03 - Play game (X wins)",
+      "name": "[03] - Play game (X wins)",
       "description": "Starts the room's game, verifies move-related failures, and plays five valid moves that give Player X the top-row win.",
       "item": [
         {
@@ -205,7 +205,7 @@
       ]
     },
     {
-      "name": "04 - Verify all read paths",
+      "name": "[04] - Verify all read paths",
       "description": "Verifies the completed game's details, board, status, moves, player and room histories, leaderboard result, and not-found handling.",
       "item": [
         {"name":"04.1: Get game","request":{"description":"Retrieves the completed game and verifies its WON status.",
@@ -229,7 +229,7 @@
       ]
     },
     {
-      "name": "05 - Rematch",
+      "name": "[05] - Rematch",
       "description": "Creates a new game from the completed game and verifies that the rematch starts with an empty board.",
       "item": [
         {
