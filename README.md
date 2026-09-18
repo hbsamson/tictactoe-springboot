@@ -216,7 +216,7 @@ Do not run that migration twice; Cassandra 3.11 will reject columns or tables th
 
 ## Postman setup
 
-Import [`postman/tictactoe-rest.postman_collection.json`](postman/tictactoe-rest.postman_collection.json). A separate Postman environment is unnecessary because the collection owns its variables and test scripts.
+Import [`postman/tictactoe-springboot.postman_collection.json`](postman/tictactoe-springboot.postman_collection.json). A separate Postman environment is unnecessary because the collection owns its variables and test scripts.
 
 ### Import and configure
 
