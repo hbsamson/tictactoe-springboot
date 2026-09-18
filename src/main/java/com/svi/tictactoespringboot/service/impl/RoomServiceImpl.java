@@ -65,8 +65,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private RoomResponse toResponse(Room room) {
-        int gameCount = histories.findByKeyOwnerId(room.getRoomId()).size();
-        return roomMapper.toResponse(room, gameCount);
+        return roomMapper.toResponse(room);
     }
 
     private void requirePlayer(UUID id) {
