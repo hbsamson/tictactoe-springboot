@@ -2,10 +2,12 @@ package com.svi.tictactoespringboot.service.impl;
 import com.svi.tictactoespringboot.dto.request.*;
 import com.svi.tictactoespringboot.dto.response.*;
 import com.svi.tictactoespringboot.entity.Room;
+import com.svi.tictactoespringboot.entity.RoomGame;
 import com.svi.tictactoespringboot.exception.ApiException;
 import com.svi.tictactoespringboot.mapper.*;
 import com.svi.tictactoespringboot.repository.*;
 import com.svi.tictactoespringboot.service.RoomService;
+import com.svi.tictactoespringboot.util.GameHistoryUtils;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.*;
@@ -58,7 +60,10 @@ public class RoomServiceImpl implements RoomService {
 
     public List<GameResponse> games(UUID id) {
         find(id);
-        return histories.findByKeyOwnerId(id).stream().map(x->games.findById(x.getKey().getGameId()).orElse(null)).filter(Objects::nonNull).map(gameMapper::toResponse).toList();
+        return GameHistoryUtils.toResponses(
+                histories.findByKeyOwnerId(id).stream().map(RoomGame::getKey),
+                games,
+                gameMapper);
     }
 
     private Room find(UUID id) {

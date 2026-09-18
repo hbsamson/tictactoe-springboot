@@ -2,10 +2,12 @@ package com.svi.tictactoespringboot.service.impl;
 import com.svi.tictactoespringboot.dto.request.CreatePlayerRequest;
 import com.svi.tictactoespringboot.dto.response.*;
 import com.svi.tictactoespringboot.entity.Player;
+import com.svi.tictactoespringboot.entity.PlayerGame;
 import com.svi.tictactoespringboot.exception.ApiException;
 import com.svi.tictactoespringboot.mapper.*;
 import com.svi.tictactoespringboot.repository.*;
 import com.svi.tictactoespringboot.service.PlayerService;
+import com.svi.tictactoespringboot.util.GameHistoryUtils;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.*;
@@ -47,7 +49,10 @@ public class PlayerServiceImpl implements PlayerService {
 
      public List<GameResponse> games(UUID id) {
          find(id);
-         return histories.findByKeyOwnerId(id).stream().map(x -> games.findById(x.getKey().getGameId()).orElse(null)).filter(Objects::nonNull).map(gameMapper::toResponse).toList();
+         return GameHistoryUtils.toResponses(
+                 histories.findByKeyOwnerId(id).stream().map(PlayerGame::getKey),
+                 games,
+                 gameMapper);
      }
 
      private Player find(UUID id) {
