@@ -22,27 +22,27 @@ public class RoomController {
     }
 
     @PostMapping
-    public ResponseEntity<RoomResponse> create(@Valid @RequestBody CreateRoomRequest request) {
+    public ResponseEntity<RoomResponse> createRoom(@Valid @RequestBody CreateRoomRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roomService.create(request));
     }
 
     @GetMapping
-    public List<RoomResponse> list() {
+    public List<RoomResponse> listRooms() {
         return roomService.list();
     }
 
     @GetMapping("/{roomId}")
-    public RoomResponse get(@PathVariable UUID roomId) {
+    public RoomResponse getRoom(@PathVariable UUID roomId) {
         return roomService.get(roomId);
     }
 
     @PostMapping("/{roomId}/join")
-    public RoomResponse join(@PathVariable UUID roomId, @Valid @RequestBody JoinRoomRequest request) {
+    public RoomResponse joinRoom(@PathVariable UUID roomId, @Valid @RequestBody JoinRoomRequest request) {
         return roomService.join(roomId, request);
     }
 
     @GetMapping("/{roomId}/games")
-    public List<GameResponse> games(@PathVariable UUID roomId) {
+    public List<GameResponse> getRoomGames(@PathVariable UUID roomId) {
         return roomService.games(roomId);
     }
 }

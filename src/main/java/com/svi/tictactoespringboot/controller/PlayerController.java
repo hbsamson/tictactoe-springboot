@@ -26,22 +26,22 @@ public class PlayerController {
     }
 
     @PostMapping
-    public ResponseEntity<PlayerResponse> create(@Valid @RequestBody CreatePlayerRequest request) {
+    public ResponseEntity<PlayerResponse> createPlayer(@Valid @RequestBody CreatePlayerRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(playerService.create(request));
     }
 
     @GetMapping
-    public List<PlayerResponse> list() {
+    public List<PlayerResponse> listPlayers() {
         return playerService.list();
     }
 
     @GetMapping("/{playerId}")
-    public PlayerResponse get(@PathVariable UUID playerId) {
+    public PlayerResponse getPlayer(@PathVariable UUID playerId) {
         return playerService.get(playerId);
     }
 
     @GetMapping("/{playerId}/games")
-    public List<GameResponse> games(@PathVariable UUID playerId) {
+    public List<GameResponse> getPlayerGames(@PathVariable UUID playerId) {
         return playerService.games(playerId);
     }
 }

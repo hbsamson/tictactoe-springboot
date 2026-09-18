@@ -24,38 +24,37 @@ public class GameController {
     }
 
     @PostMapping("/rooms/{roomId}/games")
-    public ResponseEntity<GameResponse> create(@PathVariable UUID roomId) {
+    public ResponseEntity<GameResponse> createGame(@PathVariable UUID roomId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(gameService.createGame(roomId));
     }
 
     @GetMapping("/games/{gameId}")
-    public GameResponse get(@PathVariable UUID gameId) {
+    public GameResponse getGame(@PathVariable UUID gameId) {
         return gameService.getGame(gameId);
     }
 
     @GetMapping("/games/{gameId}/board")
-    public BoardResponse board(@PathVariable UUID gameId) {
+    public BoardResponse getBoard(@PathVariable UUID gameId) {
         return gameService.getBoard(gameId);
     }
 
     @GetMapping("/games/{gameId}/status")
-    public GameStatusResponse status(@PathVariable UUID gameId) {
+    public GameStatusResponse getGameStatus(@PathVariable UUID gameId) {
         return gameService.getStatus(gameId);
     }
 
     @GetMapping("/games/{gameId}/moves")
-    public List<MoveResponse> moves(@PathVariable UUID gameId) {
+    public List<MoveResponse> getGameMoves(@PathVariable UUID gameId) {
         return gameService.getMoves(gameId);
     }
 
     @PostMapping("/games/{gameId}/moves")
-    public GameResponse move(
-            @PathVariable UUID gameId, @Valid @RequestBody MakeMoveRequest request) {
+    public GameResponse makeMove(@PathVariable UUID gameId, @Valid @RequestBody MakeMoveRequest request) {
         return gameService.makeMove(gameId, request);
     }
 
     @PostMapping("/games/{gameId}/rematches")
-    public ResponseEntity<GameResponse> rematch(@PathVariable UUID gameId) {
+    public ResponseEntity<GameResponse> createRematch(@PathVariable UUID gameId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(gameService.rematch(gameId));
     }
 }
