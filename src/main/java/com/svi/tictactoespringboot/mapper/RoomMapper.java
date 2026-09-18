@@ -12,6 +12,8 @@ public class RoomMapper {
                 room.getJoinCode(),
                 room.getHostPlayerId(),
                 room.getGuestPlayerId(),
-                room.getCreatedAt()); 
+                room.getCreatedAt(),
+                room.getExpiresAt(),
+                room.getStatus());
     } 
 }

@@ -11,6 +11,7 @@ public interface RoomService {
     RoomResponse createRoom(CreateRoomRequest request);
     List<RoomResponse> listRooms();
     RoomResponse getRoom(UUID roomId);
-    RoomResponse joinRoom(UUID roomId, JoinRoomRequest request);
+    RoomResponse joinRoom(String roomKey, JoinRoomRequest request);
+    UUID requireActiveRoom(String roomKey, UUID hostPlayerId);
     List<GameResponse> getRoomGames(UUID roomId);
 }

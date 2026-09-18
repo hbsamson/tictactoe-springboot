@@ -9,12 +9,16 @@ public enum ResponseMessage {
     // Missing resources
     PLAYER_NOT_FOUND("Player not found: %s"),
     ROOM_NOT_FOUND("Room not found: %s"),
+    ROOM_KEY_NOT_FOUND("Room key not found: %s"),
     GAME_NOT_FOUND("Game not found: %s"),
 
     // Room rules
     HOST_CANNOT_JOIN("Host is already in the room"),
     ROOM_FULL("Room already has two players"),
     ROOM_NOT_READY("Room requires two players before a game can start"),
+    ROOM_EXPIRED("Room is no longer accepting players"),
+    ROOM_ALREADY_STARTED("A game has already been started for this room"),
+    ONLY_HOST_CAN_START("Only the room host can start the game"),
 
     // Game rules
     CELL_OCCUPIED("Board cell is already occupied"),

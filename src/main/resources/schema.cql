@@ -13,7 +13,16 @@ CREATE TABLE IF NOT EXISTS rooms (
     room_key            text,
     host_player_id      uuid,
     guest_player_id     uuid,
-    created_at          timestamp
+    created_at          timestamp,
+    expires_at          timestamp,
+    status              text,
+    version             bigint
+);
+
+CREATE TABLE IF NOT EXISTS rooms_by_key (
+    room_key            text        PRIMARY KEY,
+    room_id             uuid,
+    expires_at          timestamp
 );
 
 CREATE TABLE IF NOT EXISTS games (

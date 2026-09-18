@@ -1,5 +1,7 @@
 package com.svi.tictactoespringboot.entity;
 
+import com.svi.tictactoespringboot.enums.RoomStatus;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
@@ -24,6 +26,14 @@ public class Room {
     @Column("created_at")
     private Instant createdAt;
 
+    private RoomStatus status;
+
+    @Column("expires_at")
+    private Instant expiresAt;
+
+    @Version
+    private Long version;
+
     public Room() {}
 
     public UUID getRoomId() { return roomId; }
@@ -36,4 +46,8 @@ public class Room {
     public void setGuestPlayerId(UUID guestPlayerId) { this.guestPlayerId = guestPlayerId; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public RoomStatus getStatus() { return status; }
+    public void setStatus(RoomStatus status) { this.status = status; }
+    public Instant getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
 }

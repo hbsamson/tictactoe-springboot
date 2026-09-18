@@ -36,9 +36,9 @@ public class RoomController {
         return roomService.getRoom(roomId);
     }
 
-    @PostMapping("/{roomId}/join")
-    public RoomResponse joinRoom(@PathVariable UUID roomId, @Valid @RequestBody JoinRoomRequest request) {
-        return roomService.joinRoom(roomId, request);
+    @PostMapping("/{roomKey}/join")
+    public RoomResponse joinRoom(@PathVariable String roomKey, @Valid @RequestBody JoinRoomRequest request) {
+        return roomService.joinRoom(roomKey, request);
     }
 
     @GetMapping("/{roomId}/games")

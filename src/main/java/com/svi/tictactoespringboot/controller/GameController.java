@@ -1,11 +1,13 @@
 package com.svi.tictactoespringboot.controller;
 
 import com.svi.tictactoespringboot.dto.request.MakeMoveRequest;
+import com.svi.tictactoespringboot.dto.request.StartGameRequest;
 import com.svi.tictactoespringboot.dto.response.BoardResponse;
 import com.svi.tictactoespringboot.dto.response.GameResponse;
 import com.svi.tictactoespringboot.dto.response.GameStatusResponse;
 import com.svi.tictactoespringboot.dto.response.MoveResponse;
 import com.svi.tictactoespringboot.service.GameService;
+import com.svi.tictactoespringboot.service.RoomService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +20,17 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 public class GameController {
     private final GameService gameService;
+    private final RoomService roomService;
 
-    public GameController(GameService gameService) {
+    public GameController(GameService gameService, RoomService roomService) {
         this.gameService = gameService;
+        this.roomService = roomService;
     }
 
-    @PostMapping("/rooms/{roomId}/games")
-    public ResponseEntity<GameResponse> createGame(@PathVariable UUID roomId) {
+    @PostMapping("/rooms/{roomKey}/games")
+    public ResponseEntity<GameResponse> createGame(
+            @PathVariable String roomKey, @Valid @RequestBody StartGameRequest request) {
+        UUID roomId = roomService.requireActiveRoom(roomKey, request.playerId());
         return ResponseEntity.status(HttpStatus.CREATED).body(gameService.createGame(roomId));
     }
 

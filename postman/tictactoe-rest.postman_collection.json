@@ -7,7 +7,7 @@
   "variable": [
     {"key":"baseUrl","value":"http://localhost:8080/api/v1"},
     {"key":"playerXId","value":""},{"key":"playerOId","value":""},
-    {"key":"roomId","value":""},{"key":"gameId","value":""},{"key":"rematchGameId","value":""},
+    {"key":"roomId","value":""},{"key":"roomKey","value":""},{"key":"gameId","value":""},{"key":"rematchGameId","value":""},
     {"key":"missingId","value":"00000000-0000-0000-0000-000000000001"},
     {"key":"outsiderId","value":"00000000-0000-0000-0000-000000000002"}
   ],
@@ -73,22 +73,27 @@
         {
           "name": "Create room - Player X hosts",
           "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"hostPlayerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms"},
-          "event": [{"listen":"test","script":{"exec":["pm.test('201 room created',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.hostPlayerId).to.eql(pm.collectionVariables.get('playerXId')); pm.expect(b.guestPlayerId).to.be.null;","pm.collectionVariables.set('roomId',b.roomId);"]}}]
+          "event": [{"listen":"test","script":{"exec":["pm.test('201 waiting room created',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.hostPlayerId).to.eql(pm.collectionVariables.get('playerXId')); pm.expect(b.guestPlayerId).to.be.null; pm.expect(b.status).to.eql('WAITING'); pm.expect(b.joinCode).to.match(/^[A-F0-9]{6}$/);","pm.collectionVariables.set('roomId',b.roomId); pm.collectionVariables.set('roomKey',b.joinCode);"]}}]
         },
         {
           "name": "Unhappy - game before O joins",
-          "request": {"method":"POST","url":"{{baseUrl}}/rooms/{{roomId}}/games"},
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 ROOM_NOT_READY',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('ROOM_NOT_READY');"]}}]
         },
         {
           "name": "Unhappy - host joins own room",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomId}}/join"},
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/join"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 HOST_CANNOT_JOIN',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('HOST_CANNOT_JOIN');"]}}]
         },
         {
           "name": "Player O joins",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomId}}/join"},
-          "event": [{"listen":"test","script":{"exec":["pm.test('Player O joined',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().guestPlayerId).to.eql(pm.collectionVariables.get('playerOId'));"]}}]
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/join"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('Player O joined active room',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.guestPlayerId).to.eql(pm.collectionVariables.get('playerOId')); pm.expect(b.status).to.eql('ACTIVE');"]}}]
+        },
+        {
+          "name": "Unhappy - guest cannot start game",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('409 ONLY_HOST_CAN_START',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('ONLY_HOST_CAN_START');"]}}]
         },
         {
           "name": "Get room",
@@ -107,8 +112,13 @@
       "item": [
         {
           "name": "Create game",
-          "request": {"method":"POST","url":"{{baseUrl}}/rooms/{{roomId}}/games"},
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
           "event": [{"listen":"test","script":{"exec":["pm.test('201 X starts',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.status).to.eql('IN_PROGRESS'); pm.expect(b.currentSymbol).to.eql('X'); pm.expect(b.currentPlayerId).to.eql(pm.collectionVariables.get('playerXId'));","pm.collectionVariables.set('gameId',b.gameId);"]}}]
+        },
+        {
+          "name": "Unhappy - game already started",
+          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
+          "event": [{"listen":"test","script":{"exec":["pm.test('409 ROOM_ALREADY_STARTED',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('ROOM_ALREADY_STARTED');"]}}]
         },
         {
           "name": "Unhappy - O moves out of turn",
