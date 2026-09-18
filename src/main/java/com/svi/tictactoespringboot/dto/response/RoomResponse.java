@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public record RoomResponse(
         UUID roomId,
-        String joinCode,
+        String roomKey,
         UUID hostPlayerId,
         UUID guestPlayerId,
         Instant createdAt,

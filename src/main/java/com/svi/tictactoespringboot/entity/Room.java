@@ -38,8 +38,8 @@ public class Room {
 
     public UUID getRoomId() { return roomId; }
     public void setRoomId(UUID roomId) { this.roomId = roomId; }
-    public String getJoinCode() { return roomKey; }
-    public void setJoinCode(String joinCode) { this.roomKey = joinCode; }
+    public String getRoomKey() { return roomKey; }
+    public void setRoomKey(String roomKey) { this.roomKey = roomKey; }
     public UUID getHostPlayerId() { return hostPlayerId; }
     public void setHostPlayerId(UUID hostPlayerId) { this.hostPlayerId = hostPlayerId; }
     public UUID getGuestPlayerId() { return guestPlayerId; }

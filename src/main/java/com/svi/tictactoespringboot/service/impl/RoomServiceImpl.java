@@ -60,7 +60,7 @@ public class RoomServiceImpl implements RoomService {
         room.setCreatedAt(createdAt);
         room.setExpiresAt(createdAt.plus(waitingTimeout));
         room.setStatus(RoomStatus.WAITING);
-        room.setJoinCode(reserveRoomKey(room.getRoomId(), room.getExpiresAt()));
+        room.setRoomKey(reserveRoomKey(room.getRoomId(), room.getExpiresAt()));
         Room saved = rooms.save(room);
         return toResponse(saved);
     }

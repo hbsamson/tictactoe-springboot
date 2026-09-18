@@ -73,7 +73,7 @@
         {
           "name": "Create room - Player X hosts",
           "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"hostPlayerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms"},
-          "event": [{"listen":"test","script":{"exec":["pm.test('201 waiting room created',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.hostPlayerId).to.eql(pm.collectionVariables.get('playerXId')); pm.expect(b.guestPlayerId).to.be.null; pm.expect(b.status).to.eql('WAITING'); pm.expect(b.joinCode).to.match(/^[A-F0-9]{6}$/);","pm.collectionVariables.set('roomId',b.roomId); pm.collectionVariables.set('roomKey',b.joinCode);"]}}]
+          "event": [{"listen":"test","script":{"exec":["pm.test('201 waiting room created',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.hostPlayerId).to.eql(pm.collectionVariables.get('playerXId')); pm.expect(b.guestPlayerId).to.be.null; pm.expect(b.status).to.eql('WAITING'); pm.expect(b.roomKey).to.match(/^[A-F0-9]{6}$/);","pm.collectionVariables.set('roomId',b.roomId); pm.collectionVariables.set('roomKey',b.roomKey);"]}}]
         },
         {
           "name": "Unhappy - game before O joins",
