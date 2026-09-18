@@ -8,6 +8,8 @@ import com.svi.tictactoespringboot.mapper.*;
 import com.svi.tictactoespringboot.repository.*;
 import com.svi.tictactoespringboot.service.PlayerService;
 import com.svi.tictactoespringboot.util.GameHistoryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.*;
@@ -15,6 +17,8 @@ import static com.svi.tictactoespringboot.constants.ResponseMessage.PLAYER_NOT_F
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
+    private static final Logger log = LoggerFactory.getLogger(PlayerServiceImpl.class);
+
     private final PlayerRepository players;
     private final PlayerGameRepository histories;
     private final GameRepository games;
@@ -30,10 +34,12 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
  public PlayerResponse createPlayer(CreatePlayerRequest request) {
-     return playerMapper.toResponse(players.save(
+     Player saved = players.save(
              new Player(UUID.randomUUID(),
                      request.name().trim(),
-                     Instant.now())));
+                     Instant.now()));
+     log.info("Created player: playerId={}", saved.getPlayerId());
+     return playerMapper.toResponse(saved);
     }
 
     public List<PlayerResponse> listPlayers() {

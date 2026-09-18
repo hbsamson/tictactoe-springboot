@@ -29,12 +29,16 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import static com.svi.tictactoespringboot.constants.ResponseMessage.*;
 
 @Service
 public class GameServiceImpl implements GameService {
+    private static final Logger log = LoggerFactory.getLogger(GameServiceImpl.class);
+
     private static final List<String> EMPTY_BOARD =
             List.of("", "", "", "", "", "", "", "", "");
 
@@ -136,6 +140,9 @@ public class GameServiceImpl implements GameService {
         if (saved.getStatus() == GameStatus.WON || saved.getStatus() == GameStatus.DRAW) {
             recordResult(saved);
         }
+        log.info("Move made: gameId={}, playerId={}, symbol={}, x={}, y={}, moveCount={}, status={}",
+                gameId, request.playerId(), playedSymbol, request.x(), request.y(),
+                saved.getMoveCount(), saved.getStatus());
         return gameMapper.toResponse(saved);
     }
 
@@ -150,6 +157,8 @@ public class GameServiceImpl implements GameService {
             previous.setCompletedAt(abandonedAt);
             previous.setUpdatedAt(abandonedAt);
             games.save(previous);
+            log.info("Abandoned game for rematch: gameId={}, roomId={}",
+                    previous.getGameId(), previous.getRoomId());
         }
         return gameMapper.toResponse(create(previous.getRoomId()));
     }
@@ -183,6 +192,8 @@ public class GameServiceImpl implements GameService {
                 new PlayerGame(new GameReferenceKey(playerX, createdAt, saved.getGameId())));
         playerGames.save(
                 new PlayerGame(new GameReferenceKey(playerO, createdAt, saved.getGameId())));
+        log.info("Created game: gameId={}, roomId={}, playerXId={}, playerOId={}",
+                saved.getGameId(), roomId, playerX, playerO);
         return saved;
     }
 
@@ -234,6 +245,8 @@ public class GameServiceImpl implements GameService {
         }
         leaderboard.save(playerX);
         leaderboard.save(playerO);
+        log.info("Recorded game result: gameId={}, status={}, winnerId={}",
+                game.getGameId(), game.getStatus(), game.getWinnerId());
     }
 
     private Leaderboard leaderboardEntry(UUID playerId) {

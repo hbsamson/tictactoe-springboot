@@ -10,6 +10,8 @@ import com.svi.tictactoespringboot.mapper.*;
 import com.svi.tictactoespringboot.repository.*;
 import com.svi.tictactoespringboot.service.RoomService;
 import com.svi.tictactoespringboot.util.GameHistoryUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.cassandra.core.CassandraOperations;
@@ -21,6 +23,8 @@ import static com.svi.tictactoespringboot.constants.ResponseMessage.*;
 
 @Service
 public class RoomServiceImpl implements RoomService {
+    private static final Logger log = LoggerFactory.getLogger(RoomServiceImpl.class);
+
     private final RoomRepository rooms;
     private final PlayerRepository players;
     private final RoomGameRepository histories;
@@ -63,6 +67,8 @@ public class RoomServiceImpl implements RoomService {
         room.setStatus(RoomStatus.WAITING);
         room.setRoomKey(reserveRoomKey(room.getRoomId(), room.getExpiresAt()));
         Room saved = rooms.save(room);
+        log.info("Created room: roomId={}, hostPlayerId={}, expiresAt={}",
+                saved.getRoomId(), saved.getHostPlayerId(), saved.getExpiresAt());
         return toResponse(saved);
     }
 
@@ -86,7 +92,10 @@ public class RoomServiceImpl implements RoomService {
         if (room.getGuestPlayerId()!=null && !room.getGuestPlayerId().equals(request.playerId())) throw ApiException.conflict(ROOM_FULL);
         room.setGuestPlayerId(request.playerId());
         room.setStatus(RoomStatus.ACTIVE);
-        return toResponse(rooms.save(room));
+        Room saved = rooms.save(room);
+        log.info("Player joined room: roomId={}, guestPlayerId={}",
+                saved.getRoomId(), saved.getGuestPlayerId());
+        return toResponse(saved);
     }
 
     public UUID requireActiveRoom(String roomKey, UUID hostPlayerId) {
@@ -100,6 +109,7 @@ public class RoomServiceImpl implements RoomService {
         }
         room.setStatus(RoomStatus.IN_GAME);
         rooms.save(room);
+        log.info("Room marked in game: roomId={}, hostPlayerId={}", room.getRoomId(), hostPlayerId);
         return room.getRoomId();
     }
 
@@ -127,7 +137,9 @@ public class RoomServiceImpl implements RoomService {
                 && room.getExpiresAt() != null
                 && !Instant.now().isBefore(room.getExpiresAt())) {
             room.setStatus(RoomStatus.EXPIRED);
-            return rooms.save(room);
+            Room saved = rooms.save(room);
+            log.info("Expired waiting room: roomId={}", saved.getRoomId());
+            return saved;
         }
         return room;
     }
@@ -140,8 +152,10 @@ public class RoomServiceImpl implements RoomService {
                     .substring(0, 6)
                     .toUpperCase(Locale.ROOT);
             if (cassandra.insert(new RoomKey(candidate, roomId, expiresAt), onlyIfUnused).wasApplied()) {
+                log.debug("Reserved room key: roomId={}, attempt={}", roomId, attempt + 1);
                 return candidate;
             }
+            log.debug("Room key collision: roomId={}, attempt={}", roomId, attempt + 1);
         }
         throw new IllegalStateException("Unable to allocate a unique room key");
     }

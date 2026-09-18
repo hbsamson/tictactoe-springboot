@@ -3,6 +3,8 @@ package com.svi.tictactoespringboot.exception;
 import com.svi.tictactoespringboot.dto.response.ApiErrorResponse;
 import com.svi.tictactoespringboot.constants.ResponseMessage;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +20,12 @@ import static com.svi.tictactoespringboot.constants.ResponseMessage.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ApiErrorResponse> api(ApiException exception, HttpServletRequest request) {
+        log.warn("API request rejected: method={}, path={}, status={}, code={}",
+                request.getMethod(), request.getRequestURI(), exception.getStatus().value(), exception.getCode());
         return response(exception.getStatus(), exception.getCode(), exception.getMessage(), request, List.of());
     }
     
@@ -27,15 +33,20 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiErrorResponse> validation(MethodArgumentNotValidException exception, HttpServletRequest request) {
         var fields = exception.getBindingResult().getFieldErrors().stream().map(
             fieldError -> new ApiErrorResponse.FieldError(fieldError.getField(), fieldError.getDefaultMessage())).toList();
+        log.warn("Request validation failed: method={}, path={}, fieldErrorCount={}",
+                request.getMethod(), request.getRequestURI(), fields.size());
         return response(HttpStatus.BAD_REQUEST, VALIDATION_FAILED, request, fields);
     }
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ApiErrorResponse> malformed(HttpMessageNotReadableException exception, HttpServletRequest request) {
+        log.warn("Malformed request: method={}, path={}", request.getMethod(), request.getRequestURI());
         return response(HttpStatus.BAD_REQUEST, MALFORMED_REQUEST, request, List.of());
     }
     
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<ApiErrorResponse> pathValue(MethodArgumentTypeMismatchException exception, HttpServletRequest request) {
+        log.warn("Invalid path value: method={}, path={}, parameter={}",
+                request.getMethod(), request.getRequestURI(), exception.getName());
         return response(
                 HttpStatus.BAD_REQUEST,
                 INVALID_PATH_VALUE,
@@ -46,11 +57,15 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(OptimisticLockingFailureException.class)
     ResponseEntity<ApiErrorResponse> concurrent(OptimisticLockingFailureException exception, HttpServletRequest request) {
+        log.warn("Concurrent update rejected: method={}, path={}",
+                request.getMethod(), request.getRequestURI());
         return response(HttpStatus.CONFLICT, GAME_STATE_CHANGED, request, List.of());
     }
     
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorResponse> unexpected(Exception exception, HttpServletRequest request) {
+        log.error("Unhandled request failure: method={}, path={}",
+                request.getMethod(), request.getRequestURI(), exception);
         return response(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_ERROR, request, List.of());
     }
 
