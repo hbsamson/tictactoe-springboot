@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Tic-Tac-Toe REST - Full Game Simulation",
+    "name": "Tictactoe Spring Boot - Hannah",
     "description": "Run in order. Creates X and O, exercises validation and business errors, plays a game won by X, verifies every GET path, and creates a rematch. IDs are captured automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -13,190 +13,235 @@
   ],
   "item": [
     {
-      "name": "01 - Create two players",
+      "name": "[01] - Create two players",
+      "description": "Creates the two players used by the remaining scenarios, then verifies player validation and read endpoints.",
       "item": [
         {
-          "name": "Create Player X - Hannah",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Hannah\"\n}"},"url":"{{baseUrl}}/players"},
+          "name": "01.1: Create Player X - Hannah",
+          "request": {"description":"Creates Hannah as Player X and saves the returned playerId for later requests.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Hannah\"\n}"},"url":"{{baseUrl}}/players"},
           "event": [{"listen":"test","script":{"exec":["pm.test('201 Created', () => pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.name).to.eql('Hannah');","pm.collectionVariables.set('playerXId', b.playerId);"]}}]
         },
         {
-          "name": "Create Player O - Patricia",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Patricia\"\n}"},"url":"{{baseUrl}}/players"},
+          "name": "01.2: Create Player O - Patricia",
+          "request": {"description":"Creates Patricia as Player O and saves the returned playerId for later requests.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Patricia\"\n}"},"url":"{{baseUrl}}/players"},
           "event": [{"listen":"test","script":{"exec":["pm.test('201 Created', () => pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.name).to.eql('Patricia');","pm.collectionVariables.set('playerOId', b.playerId);"]}}]
         },
         {
-          "name": "Validation Test - blank name",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"name\":\"   \"}"},"url":"{{baseUrl}}/players"},
+          "name": "01.3: [Validation] Blank name",
+          "request": {"description":"Verifies that a blank player name returns 400 VALIDATION_FAILED with a name field error.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"name\":\"   \"}"},"url":"{{baseUrl}}/players"},
           "event": [{"listen":"test","script":{"exec":["pm.test('400 VALIDATION_FAILED',()=>pm.response.to.have.status(400));","const b=pm.response.json(); pm.expect(b.code).to.eql('VALIDATION_FAILED'); pm.expect(b.fieldErrors.some(e=>e.field==='name')).to.be.true;"]}}]
         },
         {
-          "name": "Validation Test - malformed JSON",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"name\":\"broken\""},"url":"{{baseUrl}}/players"},
+          "name": "01.4: [Validation] Malformed JSON",
+          "request": {"description":"Verifies that invalid JSON returns 400 MALFORMED_REQUEST.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"name\":\"broken\""},"url":"{{baseUrl}}/players"},
           "event": [{"listen":"test","script":{"exec":["pm.test('400 MALFORMED_REQUEST',()=>pm.response.to.have.status(400));","pm.expect(pm.response.json().code).to.eql('MALFORMED_REQUEST');"]}}]
         },
         {
-          "name": "List players",
-          "request": {"method":"GET","url":"{{baseUrl}}/players"},
+          "name": "01.5: List players",
+          "request": {"description":"Lists all players and verifies that both newly created players are present.",
+            "method":"GET","url":"{{baseUrl}}/players"},
           "event": [{"listen":"test","script":{"exec":["pm.test('both players listed',()=>pm.response.to.have.status(200));","const ids=pm.response.json().map(p=>p.playerId); pm.expect(ids).to.include.members([pm.collectionVariables.get('playerXId'),pm.collectionVariables.get('playerOId')]);"]}}]
         },
         {
-          "name": "Get Player X",
-          "request": {"method":"GET","url":"{{baseUrl}}/players/{{playerXId}}"},
+          "name": "01.6: Get Player X",
+          "request": {"description":"Retrieves Player X by UUID.",
+            "method":"GET","url":"{{baseUrl}}/players/{{playerXId}}"},
           "event": [{"listen":"test","script":{"exec":["pm.test('Player X returned',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().playerId).to.eql(pm.collectionVariables.get('playerXId'));"]}}]
         },
         {
-          "name": "Unhappy - player not found",
-          "request": {"method":"GET","url":"{{baseUrl}}/players/{{missingId}}"},
+          "name": "01.7: [Error] Player not found",
+          "request": {"description":"Verifies that an unknown player UUID returns 404 PLAYER_NOT_FOUND.",
+            "method":"GET","url":"{{baseUrl}}/players/{{missingId}}"},
           "event": [{"listen":"test","script":{"exec":["pm.test('404 PLAYER_NOT_FOUND',()=>pm.response.to.have.status(404));","pm.expect(pm.response.json().code).to.eql('PLAYER_NOT_FOUND');"]}}]
         },
         {
-          "name": "Validation Test - invalid player UUID",
-          "request": {"method":"GET","url":"{{baseUrl}}/players/not-a-uuid"},
+          "name": "01.8: [Validation] Invalid player UUID",
+          "request": {"description":"Verifies that a malformed player UUID returns 400 INVALID_PATH_VALUE.",
+            "method":"GET","url":"{{baseUrl}}/players/not-a-uuid"},
           "event": [{"listen":"test","script":{"exec":["pm.test('400 INVALID_PATH_VALUE',()=>pm.response.to.have.status(400));","pm.expect(pm.response.json().code).to.eql('INVALID_PATH_VALUE');"]}}]
         }
       ]
     },
     {
       "name": "02 - Room Setup",
+      "description": "Creates a waiting room, joins a guest, and exercises room validation, lifecycle, and host-only start rules.",
       "item": [
         {
-          "name": "Validation Test - missing hostPlayerId",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{}"},"url":"{{baseUrl}}/rooms"},
+          "name": "02.1: [Validation] Missing hostPlayerId",
+          "request": {"description":"Verifies that creating a room without hostPlayerId returns 400 VALIDATION_FAILED.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{}"},"url":"{{baseUrl}}/rooms"},
           "event": [{"listen":"test","script":{"exec":["pm.test('400 VALIDATION_FAILED',()=>pm.response.to.have.status(400));","pm.expect(pm.response.json().code).to.eql('VALIDATION_FAILED');"]}}]
         },
         {
-          "name": "Unhappy - invalid host playerId",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"hostPlayerId\":\"{{missingId}}\"}"},"url":"{{baseUrl}}/rooms"},
+          "name": "02.2: [Error] Invalid host playerId",
+          "request": {"description":"Verifies that an unknown host player returns 404 PLAYER_NOT_FOUND.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"hostPlayerId\":\"{{missingId}}\"}"},"url":"{{baseUrl}}/rooms"},
           "event": [{"listen":"test","script":{"exec":["pm.test('404 PLAYER_NOT_FOUND',()=>pm.response.to.have.status(404));","pm.expect(pm.response.json().code).to.eql('PLAYER_NOT_FOUND');"]}}]
         },
         {
-          "name": "Create room - Player X hosts",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"hostPlayerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms"},
+          "name": "02.3: Create room - Player X hosts",
+          "request": {"description":"Creates a waiting room hosted by Player X and saves its roomId and roomKey.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"hostPlayerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms"},
           "event": [{"listen":"test","script":{"exec":["pm.test('201 waiting room created',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.hostPlayerId).to.eql(pm.collectionVariables.get('playerXId')); pm.expect(b.guestPlayerId).to.be.null; pm.expect(b.status).to.eql('WAITING'); pm.expect(b.roomKey).to.match(/^[A-F0-9]{6}$/);","pm.collectionVariables.set('roomId',b.roomId); pm.collectionVariables.set('roomKey',b.roomKey);"]}}]
         },
         {
-          "name": "Unhappy - game before O joins",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
+          "name": "02.4: [Error] Game before O joins",
+          "request": {"description":"Verifies that a game cannot start before a guest joins the room.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 ROOM_NOT_READY',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('ROOM_NOT_READY');"]}}]
         },
         {
-          "name": "Unhappy - host joins own room",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/join"},
+          "name": "02.5: [Error] Host joins own room",
+          "request": {"description":"Verifies that the host cannot occupy the guest position in their own room.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/join"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 HOST_CANNOT_JOIN',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('HOST_CANNOT_JOIN');"]}}]
         },
         {
-          "name": "Player O joins",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/join"},
+          "name": "02.6: Player O joins",
+          "request": {"description":"Joins Player O as the guest and moves the room from WAITING to ACTIVE.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/join"},
           "event": [{"listen":"test","script":{"exec":["pm.test('Player O joined active room',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.guestPlayerId).to.eql(pm.collectionVariables.get('playerOId')); pm.expect(b.status).to.eql('ACTIVE');"]}}]
         },
         {
-          "name": "Unhappy - guest cannot start game",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
+          "name": "02.7: [Error] Guest starts game",
+          "request": {"description":"Verifies that only the host can start the room's initial game.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 ONLY_HOST_CAN_START',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('ONLY_HOST_CAN_START');"]}}]
         },
         {
-          "name": "Get room",
-          "request": {"method":"GET","url":"{{baseUrl}}/rooms/{{roomId}}"},
+          "name": "02.8: Get room",
+          "request": {"description":"Retrieves the active room by UUID.",
+            "method":"GET","url":"{{baseUrl}}/rooms/{{roomId}}"},
           "event": [{"listen":"test","script":{"exec":["pm.test('room returned',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().roomId).to.eql(pm.collectionVariables.get('roomId'));"]}}]
         },
         {
-          "name": "List rooms",
-          "request": {"method":"GET","url":"{{baseUrl}}/rooms"},
+          "name": "02.9: List rooms",
+          "request": {"description":"Lists all rooms and verifies that the scenario room is present.",
+            "method":"GET","url":"{{baseUrl}}/rooms"},
           "event": [{"listen":"test","script":{"exec":["pm.test('room listed',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(r=>r.roomId===pm.collectionVariables.get('roomId'))).to.be.true;"]}}]
         }
       ]
     },
     {
-      "name": "03 - Play game - X wins",
+      "name": "03 - Play game (X wins)",
+      "description": "Starts the room's game, verifies move-related failures, and plays five valid moves that give Player X the top-row win.",
       "item": [
         {
-          "name": "Create game",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
+          "name": "03.1: Create game",
+          "request": {"description":"Starts the initial game as the room host and saves the returned gameId.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
           "event": [{"listen":"test","script":{"exec":["pm.test('201 X starts',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.status).to.eql('IN_PROGRESS'); pm.expect(b.currentSymbol).to.eql('X'); pm.expect(b.currentPlayerId).to.eql(pm.collectionVariables.get('playerXId'));","pm.collectionVariables.set('gameId',b.gameId);"]}}]
         },
         {
-          "name": "Unhappy - game already started",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
+          "name": "03.2: [Error] Game already started",
+          "request": {"description":"Verifies that the room-key endpoint cannot start a second initial game.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\"}"},"url":"{{baseUrl}}/rooms/{{roomKey}}/games"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 ROOM_ALREADY_STARTED',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('ROOM_ALREADY_STARTED');"]}}]
         },
         {
-          "name": "Unhappy - O moves out of turn",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.3: [Error] O moves out of turn",
+          "request": {"description":"Verifies that Player O cannot move while it is Player X's turn.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 OUT_OF_TURN',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('OUT_OF_TURN');"]}}]
         },
         {
-          "name": "Unhappy - outsider moves",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{outsiderId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.4: [Error] Outsider moves",
+          "request": {"description":"Verifies that a player who is not part of the game cannot submit a move.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{outsiderId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 PLAYER_NOT_IN_GAME',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('PLAYER_NOT_IN_GAME');"]}}]
         },
         {
-          "name": "Validation Test - coordinates out of range",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":3,\"y\":-1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.5: [Validation] Coordinates out of range",
+          "request": {"description":"Verifies that board coordinates outside 0-2 return validation errors for x and y.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":3,\"y\":-1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('400 invalid coordinates',()=>pm.response.to.have.status(400));","const b=pm.response.json(); pm.expect(b.code).to.eql('VALIDATION_FAILED'); pm.expect(b.fieldErrors.map(e=>e.field)).to.include.members(['x','y']);"]}}]
         },
         {
-          "name": "Move 1 - X (0,0)",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.6: Move 1 - X (0,0)",
+          "request": {"description":"Places X in the top-left cell and advances the turn to Player O.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('X move accepted',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.moveCount).to.eql(1); pm.expect(b.board[0]).to.eql('X'); pm.expect(b.currentSymbol).to.eql('O');"]}}]
         },
         {
-          "name": "Unhappy - occupied cell",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.7: [Error] Occupied cell",
+          "request": {"description":"Verifies that Player O cannot overwrite Player X's occupied top-left cell.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 CELL_OCCUPIED',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('CELL_OCCUPIED');"]}}]
         },
         {
-          "name": "Move 2 - O (0,1)",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.8: Move 2 - O (0,1)",
+          "request": {"description":"Places O in the middle-left cell as the second move.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":0,\"y\":1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('O move accepted',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().moveCount).to.eql(2);"]}}]
         },
         {
-          "name": "Move 3 - X (1,0)",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":1,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.9: Move 3 - X (1,0)",
+          "request": {"description":"Places X in the top-center cell as the third move.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":1,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('X move accepted',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().moveCount).to.eql(3);"]}}]
         },
         {
-          "name": "Move 4 - O (1,1)",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":1,\"y\":1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.10: Move 4 - O (1,1)",
+          "request": {"description":"Places O in the center cell as the fourth move.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":1,\"y\":1}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('O move accepted',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().moveCount).to.eql(4);"]}}]
         },
         {
-          "name": "Move 5 - X (2,0) wins",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":2,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.11: Move 5 - X (2,0) wins",
+          "request": {"description":"Places X in the top-right cell, completing the top row and winning the game.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerXId}}\",\"x\":2,\"y\":0}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('X wins',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.status).to.eql('WON'); pm.expect(b.winnerId).to.eql(pm.collectionVariables.get('playerXId')); pm.expect(b.board.slice(0,3)).to.eql(['X','X','X']);"]}}]
         },
         {
-          "name": "Unhappy - move after completion",
-          "request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":2,\"y\":2}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
+          "name": "03.12: [Error] Move after completed game",
+          "request": {"description":"Verifies that no additional move is accepted after the game has been won.",
+            "method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"playerId\":\"{{playerOId}}\",\"x\":2,\"y\":2}"},"url":"{{baseUrl}}/games/{{gameId}}/moves"},
           "event": [{"listen":"test","script":{"exec":["pm.test('409 GAME_NOT_ACTIVE',()=>pm.response.to.have.status(409));","pm.expect(pm.response.json().code).to.eql('GAME_NOT_ACTIVE');"]}}]
         }
       ]
     },
     {
       "name": "04 - Verify all read paths",
+      "description": "Verifies the completed game's details, board, status, moves, player and room histories, leaderboard result, and not-found handling.",
       "item": [
-        {"name":"Get game","request":{"method":"GET","url":"{{baseUrl}}/games/{{gameId}}"},"event":[{"listen":"test","script":{"exec":["pm.test('game is WON',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().status).to.eql('WON');"]}}]},
-        {"name":"Get board","request":{"method":"GET","url":"{{baseUrl}}/games/{{gameId}}/board"},"event":[{"listen":"test","script":{"exec":["pm.test('winning board',()=>pm.response.to.have.status(200));","const c=pm.response.json().cells; pm.expect(c).to.have.length(9); pm.expect(c.slice(0,3)).to.eql(['X','X','X']);"]}}]},
-        {"name":"Get status","request":{"method":"GET","url":"{{baseUrl}}/games/{{gameId}}/status"},"event":[{"listen":"test","script":{"exec":["pm.test('X is winner',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.status).to.eql('WON'); pm.expect(b.winnerId).to.eql(pm.collectionVariables.get('playerXId'));"]}}]},
-        {"name":"Get moves","request":{"method":"GET","url":"{{baseUrl}}/games/{{gameId}}/moves"},"event":[{"listen":"test","script":{"exec":["pm.test('five ordered moves',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b).to.have.length(5); pm.expect(b.map(m=>m.moveNumber)).to.eql([1,2,3,4,5]);"]}}]},
-        {"name":"Player X games","request":{"method":"GET","url":"{{baseUrl}}/players/{{playerXId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('X history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
-        {"name":"Player O games","request":{"method":"GET","url":"{{baseUrl}}/players/{{playerOId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('O history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
-        {"name":"Room games","request":{"method":"GET","url":"{{baseUrl}}/rooms/{{roomId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('room history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
-        {"name":"Leaderboard","request":{"method":"GET","url":"{{baseUrl}}/leaderboard"},"event":[{"listen":"test","script":{"exec":["pm.test('X gets a win; O gets a loss',()=>pm.response.to.have.status(200));","const e=pm.response.json().entries,x=e.find(v=>v.playerId===pm.collectionVariables.get('playerXId')),o=e.find(v=>v.playerId===pm.collectionVariables.get('playerOId')); pm.expect(x.wins).to.eql(1); pm.expect(o.losses).to.eql(1);"]}}]},
-        {"name":"Unhappy - game not found","request":{"method":"GET","url":"{{baseUrl}}/games/{{missingId}}"},"event":[{"listen":"test","script":{"exec":["pm.test('404 GAME_NOT_FOUND',()=>pm.response.to.have.status(404));","pm.expect(pm.response.json().code).to.eql('GAME_NOT_FOUND');"]}}]}
+        {"name":"04.1: Get game","request":{"description":"Retrieves the completed game and verifies its WON status.",
+          "method":"GET","url":"{{baseUrl}}/games/{{gameId}}"},"event":[{"listen":"test","script":{"exec":["pm.test('game is WON',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().status).to.eql('WON');"]}}]},
+        {"name":"04.2: Get board","request":{"description":"Retrieves the nine board cells and verifies Player X's winning top row.",
+          "method":"GET","url":"{{baseUrl}}/games/{{gameId}}/board"},"event":[{"listen":"test","script":{"exec":["pm.test('winning board',()=>pm.response.to.have.status(200));","const c=pm.response.json().cells; pm.expect(c).to.have.length(9); pm.expect(c.slice(0,3)).to.eql(['X','X','X']);"]}}]},
+        {"name":"04.3: Get status","request":{"description":"Retrieves the game result and verifies that Player X is the winner.",
+          "method":"GET","url":"{{baseUrl}}/games/{{gameId}}/status"},"event":[{"listen":"test","script":{"exec":["pm.test('X is winner',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b.status).to.eql('WON'); pm.expect(b.winnerId).to.eql(pm.collectionVariables.get('playerXId'));"]}}]},
+        {"name":"04.4: Get moves","request":{"description":"Retrieves the move history and verifies all five moves are ordered by move number.",
+          "method":"GET","url":"{{baseUrl}}/games/{{gameId}}/moves"},"event":[{"listen":"test","script":{"exec":["pm.test('five ordered moves',()=>pm.response.to.have.status(200));","const b=pm.response.json(); pm.expect(b).to.have.length(5); pm.expect(b.map(m=>m.moveNumber)).to.eql([1,2,3,4,5]);"]}}]},
+        {"name":"04.5: Player X games","request":{"description":"Lists Player X's game history and verifies that it contains the completed game.",
+          "method":"GET","url":"{{baseUrl}}/players/{{playerXId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('X history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
+        {"name":"04.6: Player O games","request":{"description":"Lists Player O's game history and verifies that it contains the completed game.",
+          "method":"GET","url":"{{baseUrl}}/players/{{playerOId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('O history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
+        {"name":"04.7: Room games","request":{"description":"Lists the room's game history and verifies that it contains the completed game.",
+          "method":"GET","url":"{{baseUrl}}/rooms/{{roomId}}/games"},"event":[{"listen":"test","script":{"exec":["pm.test('room history has game',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().some(g=>g.gameId===pm.collectionVariables.get('gameId'))).to.be.true;"]}}]},
+        {"name":"04.8: Leaderboard","request":{"description":"Retrieves the leaderboard and verifies Player X's win and Player O's loss.",
+          "method":"GET","url":"{{baseUrl}}/leaderboard"},"event":[{"listen":"test","script":{"exec":["pm.test('X gets a win; O gets a loss',()=>pm.response.to.have.status(200));","const e=pm.response.json().entries,x=e.find(v=>v.playerId===pm.collectionVariables.get('playerXId')),o=e.find(v=>v.playerId===pm.collectionVariables.get('playerOId')); pm.expect(x.wins).to.eql(1); pm.expect(o.losses).to.eql(1);"]}}]},
+        {"name":"04.9: [Error] Game not found","request":{"description":"Verifies that an unknown game UUID returns 404 GAME_NOT_FOUND.",
+          "method":"GET","url":"{{baseUrl}}/games/{{missingId}}"},"event":[{"listen":"test","script":{"exec":["pm.test('404 GAME_NOT_FOUND',()=>pm.response.to.have.status(404));","pm.expect(pm.response.json().code).to.eql('GAME_NOT_FOUND');"]}}]}
       ]
     },
     {
       "name": "05 - Rematch",
+      "description": "Creates a new game from the completed game and verifies that the rematch starts with an empty board.",
       "item": [
         {
-          "name": "Create rematch",
-          "request": {"method":"POST","url":"{{baseUrl}}/games/{{gameId}}/rematches"},
+          "name": "05.1: Create rematch",
+          "request": {"description":"Creates a fresh rematch with the same players and saves the new gameId.",
+            "method":"POST","url":"{{baseUrl}}/games/{{gameId}}/rematches"},
           "event": [{"listen":"test","script":{"exec":["pm.test('201 fresh game',()=>pm.response.to.have.status(201));","const b=pm.response.json(); pm.expect(b.gameId).to.not.eql(pm.collectionVariables.get('gameId')); pm.expect(b.status).to.eql('IN_PROGRESS'); pm.expect(b.currentPlayerId).to.eql(pm.collectionVariables.get('playerXId'));","pm.collectionVariables.set('rematchGameId',b.gameId);"]}}]
         },
         {
-          "name": "Verify rematch board",
-          "request": {"method":"GET","url":"{{baseUrl}}/games/{{rematchGameId}}/board"},
+          "name": "05.2: Verify rematch board",
+          "request": {"description":"Retrieves the rematch board and verifies that all nine cells are empty.",
+            "method":"GET","url":"{{baseUrl}}/games/{{rematchGameId}}/board"},
           "event": [{"listen":"test","script":{"exec":["pm.test('empty rematch board',()=>pm.response.to.have.status(200));","pm.expect(pm.response.json().cells).to.eql(['','','','','','','','','']);"]}}]
         }
       ]
