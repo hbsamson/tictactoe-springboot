@@ -14,7 +14,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
           this.repository=repository;
      }
 
-     public LeaderboardResponse get() {
+     public LeaderboardResponse getLeaderboard() {
            var rows = new ArrayList<Leaderboard>();
            repository.findAll().forEach(rows::add);
            rows.sort(Comparator.comparingInt(Leaderboard::getWins).reversed()
@@ -23,16 +23,16 @@ public class LeaderboardServiceImpl implements LeaderboardService {
                    .thenComparing(Leaderboard::getPlayerName, String.CASE_INSENSITIVE_ORDER));
 
            var entries = new ArrayList<LeaderboardResponse.Entry>();
-           for(int i = 0; i < rows.size(); i++) {
-               var x = rows.get(i);
+           for(int index = 0; index < rows.size(); index++) {
+               var row = rows.get(index);
                entries.add(
                        new LeaderboardResponse.Entry(
-                               i+1,
-                               x.getPlayerId(),
-                               x.getPlayerName(),
-                               x.getWins(),
-                               x.getDraws(),
-                               x.getLosses()
+                               index + 1,
+                               row.getPlayerId(),
+                               row.getPlayerName(),
+                               row.getWins(),
+                               row.getDraws(),
+                               row.getLosses()
                        )
                );
            }

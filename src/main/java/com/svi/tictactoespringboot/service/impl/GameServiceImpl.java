@@ -92,14 +92,14 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public GameStatusResponse getStatus(UUID gameId) {
+    public GameStatusResponse getGameStatus(UUID gameId) {
         Game game = find(gameId);
         return new GameStatusResponse(
                 gameId, game.getStatus(), game.getCurrentPlayerId(), game.getWinnerId());
     }
 
     @Override
-    public List<MoveResponse> getMoves(UUID gameId) {
+    public List<MoveResponse> getGameMoves(UUID gameId) {
         find(gameId);
         return moves.findByKeyGameId(gameId).stream().map(moveMapper::toResponse).toList();
     }
@@ -140,7 +140,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public GameResponse rematch(UUID gameId) {
+    public GameResponse createRematch(UUID gameId) {
         Game previous = find(gameId);
         if (previous.getStatus() == GameStatus.IN_PROGRESS) {
             Instant abandonedAt = Instant.now();
@@ -214,9 +214,9 @@ public class GameServiceImpl implements GameService {
             game.setCurrentSymbol(null);
             game.setCompletedAt(playedAt);
         } else {
-            boolean xPlayed = playedSymbol == PlayerSymbol.X;
-            game.setCurrentSymbol(xPlayed ? PlayerSymbol.O : PlayerSymbol.X);
-            game.setCurrentPlayerId(xPlayed ? game.getPlayerOId() : game.getPlayerXId());
+            boolean wasXMove = playedSymbol == PlayerSymbol.X;
+            game.setCurrentSymbol(wasXMove ? PlayerSymbol.O : PlayerSymbol.X);
+            game.setCurrentPlayerId(wasXMove ? game.getPlayerOId() : game.getPlayerXId());
         }
     }
 

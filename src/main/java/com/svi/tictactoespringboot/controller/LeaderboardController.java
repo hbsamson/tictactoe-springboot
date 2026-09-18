@@ -17,6 +17,6 @@ public class LeaderboardController {
 
     @GetMapping
     public LeaderboardResponse getLeaderboard() {
-        return leaderboardService.get();
+        return leaderboardService.getLeaderboard();
     }
 }

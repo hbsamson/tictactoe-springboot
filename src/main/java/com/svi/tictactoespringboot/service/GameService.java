@@ -8,8 +8,8 @@ public interface GameService {
     GameResponse createGame(UUID roomId);
     GameResponse getGame(UUID gameId);
     BoardResponse getBoard(UUID gameId);
-    GameStatusResponse getStatus(UUID gameId);
-    List<MoveResponse> getMoves(UUID gameId);
+    GameStatusResponse getGameStatus(UUID gameId);
+    List<MoveResponse> getGameMoves(UUID gameId);
     GameResponse makeMove(UUID gameId, MakeMoveRequest request);
-    GameResponse rematch(UUID gameId);
+    GameResponse createRematch(UUID gameId);
 }

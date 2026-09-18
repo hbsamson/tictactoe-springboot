@@ -40,12 +40,12 @@ public class GameController {
 
     @GetMapping("/games/{gameId}/status")
     public GameStatusResponse getGameStatus(@PathVariable UUID gameId) {
-        return gameService.getStatus(gameId);
+        return gameService.getGameStatus(gameId);
     }
 
     @GetMapping("/games/{gameId}/moves")
     public List<MoveResponse> getGameMoves(@PathVariable UUID gameId) {
-        return gameService.getMoves(gameId);
+        return gameService.getGameMoves(gameId);
     }
 
     @PostMapping("/games/{gameId}/moves")
@@ -55,6 +55,6 @@ public class GameController {
 
     @PostMapping("/games/{gameId}/rematches")
     public ResponseEntity<GameResponse> createRematch(@PathVariable UUID gameId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(gameService.rematch(gameId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(gameService.createRematch(gameId));
     }
 }

@@ -16,32 +16,35 @@ public class Move {
     private UUID playerId;
 
     private PlayerSymbol symbol;
-    private int x;
-    private int y;
+    @Column("x")
+    private int coordinateX;
+
+    @Column("y")
+    private int coordinateY;
 
     @Column("played_at")
     private Instant playedAt;
 
     public Move() {}
-    public Move(MoveKey key, UUID playerId, PlayerSymbol symbol, int x, int y, Instant playedAt) {
+    public Move(MoveKey key, UUID playerId, PlayerSymbol symbol, int coordinateX, int coordinateY, Instant playedAt) {
         this.key = key;
         this.playerId = playerId;
         this.symbol = symbol;
-        this.x = x;
-        this.y = y;
+        this.coordinateX = coordinateX;
+        this.coordinateY = coordinateY;
         this.playedAt = playedAt;
     }
 
     public MoveKey getKey() { return key; }
-    public void setKey(MoveKey v) { key = v; }
+    public void setKey(MoveKey key) { this.key = key; }
     public UUID getPlayerId() { return playerId; }
-    public void setPlayerId(UUID v) { playerId = v; }
+    public void setPlayerId(UUID playerId) { this.playerId = playerId; }
     public PlayerSymbol getSymbol() { return symbol; }
-    public void setSymbol(PlayerSymbol v) { symbol = v; }
-    public int getX() { return x; }
-    public void setX(int v) { x = v; }
-    public int getY() { return y; }
-    public void setY(int v) { y = v; }
+    public void setSymbol(PlayerSymbol symbol) { this.symbol = symbol; }
+    public int getX() { return coordinateX; }
+    public void setX(int coordinateX) { this.coordinateX = coordinateX; }
+    public int getY() { return coordinateY; }
+    public void setY(int coordinateY) { this.coordinateY = coordinateY; }
     public Instant getPlayedAt() { return playedAt; }
-    public void setPlayedAt(Instant v) { playedAt = v; }
+    public void setPlayedAt(Instant playedAt) { this.playedAt = playedAt; }
 }

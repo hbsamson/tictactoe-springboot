@@ -57,29 +57,29 @@ public class Game {
     public Game() {}
     
     public UUID getGameId() { return gameId; }
-    public void setGameId(UUID v) { gameId = v; }
+    public void setGameId(UUID gameId) { this.gameId = gameId; }
     public UUID getRoomId() { return roomId; }
-    public void setRoomId(UUID v) { roomId = v; }
+    public void setRoomId(UUID roomId) { this.roomId = roomId; }
     public UUID getPlayerXId() { return playerXId; }
-    public void setPlayerXId(UUID v) { playerXId = v; }
+    public void setPlayerXId(UUID playerXId) { this.playerXId = playerXId; }
     public UUID getPlayerOId() { return playerOId; }
-    public void setPlayerOId(UUID v) { playerOId = v; }
+    public void setPlayerOId(UUID playerOId) { this.playerOId = playerOId; }
     public UUID getCurrentPlayerId() { return currentPlayerId; }
-    public void setCurrentPlayerId(UUID v) { currentPlayerId = v; }
+    public void setCurrentPlayerId(UUID currentPlayerId) { this.currentPlayerId = currentPlayerId; }
     public PlayerSymbol getCurrentSymbol() { return currentSymbol; }
-    public void setCurrentSymbol(PlayerSymbol v) { currentSymbol = v; }
+    public void setCurrentSymbol(PlayerSymbol currentSymbol) { this.currentSymbol = currentSymbol; }
     public GameStatus getStatus() { return status; }
-    public void setStatus(GameStatus v) { status = v; }
+    public void setStatus(GameStatus status) { this.status = status; }
     public UUID getWinnerId() { return winnerId; }
-    public void setWinnerId(UUID v) { winnerId = v; }
+    public void setWinnerId(UUID winnerId) { this.winnerId = winnerId; }
     public List<String> getBoard() { return board == null ? new ArrayList<>() : board; }
-    public void setBoard(List<String> v) { board = v; }
+    public void setBoard(List<String> board) { this.board = board; }
     public int getMoveCount() { return moveCount; }
-    public void setMoveCount(int v) { moveCount = v; }
+    public void setMoveCount(int moveCount) { this.moveCount = moveCount; }
     public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant v) { createdAt = v; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Instant v) { updatedAt = v; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
     public Instant getCompletedAt() { return completedAt; }
-    public void setCompletedAt(Instant v) { completedAt = v; }
+    public void setCompletedAt(Instant completedAt) { this.completedAt = completedAt; }
 }

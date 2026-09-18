@@ -21,36 +21,36 @@ public class PlayerServiceImpl implements PlayerService {
     private final PlayerMapper playerMapper;
     private final GameMapper gameMapper;
 
-    public PlayerServiceImpl(PlayerRepository players, PlayerGameRepository h, GameRepository games, PlayerMapper playerMapper, GameMapper gameMapper) {
+    public PlayerServiceImpl(PlayerRepository players, PlayerGameRepository histories, GameRepository games, PlayerMapper playerMapper, GameMapper gameMapper) {
         this.players = players;
-        this.histories = h;
+        this.histories = histories;
         this.games = games;
         this.playerMapper = playerMapper;
         this.gameMapper = gameMapper;
     }
 
- public PlayerResponse create(CreatePlayerRequest request) {
+ public PlayerResponse createPlayer(CreatePlayerRequest request) {
      return playerMapper.toResponse(players.save(
              new Player(UUID.randomUUID(),
                      request.name().trim(),
                      Instant.now())));
     }
 
-    public List<PlayerResponse> list() {
+    public List<PlayerResponse> listPlayers() {
         var result=new ArrayList<PlayerResponse>();
-        players.findAll().forEach(p -> result.add(playerMapper.toResponse(p)));
+        players.findAll().forEach(player -> result.add(playerMapper.toResponse(player)));
         result.sort(Comparator.comparing(PlayerResponse::name,String.CASE_INSENSITIVE_ORDER));
         return result;
     }
 
-     public PlayerResponse get(UUID id) {
-         return playerMapper.toResponse(find(id));
+     public PlayerResponse getPlayer(UUID playerId) {
+         return playerMapper.toResponse(find(playerId));
      }
 
-     public List<GameResponse> games(UUID id) {
-         find(id);
+     public List<GameResponse> getPlayerGames(UUID playerId) {
+         find(playerId);
          return GameHistoryUtils.toResponses(
-                 histories.findByKeyOwnerId(id).stream().map(PlayerGame::getKey),
+                 histories.findByKeyOwnerId(playerId).stream().map(PlayerGame::getKey),
                  games,
                  gameMapper);
      }

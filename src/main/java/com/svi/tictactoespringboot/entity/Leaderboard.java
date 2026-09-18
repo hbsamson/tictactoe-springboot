@@ -21,13 +21,13 @@ public class Leaderboard {
     public Leaderboard(UUID id, String name) { playerId = id; playerName = name; }
 
     public UUID getPlayerId() { return playerId; }
-    public void setPlayerId(UUID v) { playerId = v; }
+    public void setPlayerId(UUID playerId) { this.playerId = playerId; }
     public String getPlayerName() { return playerName; }
-    public void setPlayerName(String v) { playerName = v; }
+    public void setPlayerName(String playerName) { this.playerName = playerName; }
     public int getWins() { return wins; }
-    public void setWins(int v) { wins = v; }
+    public void setWins(int wins) { this.wins = wins; }
     public int getDraws() { return draws; }
-    public void setDraws(int v) { draws = v; }
+    public void setDraws(int draws) { this.draws = draws; }
     public int getLosses() { return losses; }
-    public void setLosses(int v) { losses = v; }
+    public void setLosses(int losses) { this.losses = losses; }
 }

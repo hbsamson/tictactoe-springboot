@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface RoomService {
-    RoomResponse create(CreateRoomRequest request);
-    List<RoomResponse> list();
-    RoomResponse get(UUID id);
-    RoomResponse join(UUID id, JoinRoomRequest request);
-    List<GameResponse> games(UUID id);
+    RoomResponse createRoom(CreateRoomRequest request);
+    List<RoomResponse> listRooms();
+    RoomResponse getRoom(UUID roomId);
+    RoomResponse joinRoom(UUID roomId, JoinRoomRequest request);
+    List<GameResponse> getRoomGames(UUID roomId);
 }

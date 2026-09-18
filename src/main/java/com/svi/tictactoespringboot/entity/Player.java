@@ -26,9 +26,9 @@ public class Player {
     }
     
     public UUID getPlayerId() { return playerId; }
-    public void setPlayerId(UUID v) { playerId = v; }
+    public void setPlayerId(UUID playerId) { this.playerId = playerId; }
     public String getName() { return name; }
-    public void setName(String v) { name = v; }
+    public void setName(String name) { this.name = name; }
     public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant v) { createdAt = v; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

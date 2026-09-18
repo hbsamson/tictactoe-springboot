@@ -27,13 +27,13 @@ public class Room {
     public Room() {}
 
     public UUID getRoomId() { return roomId; }
-    public void setRoomId(UUID v) { roomId = v; }
+    public void setRoomId(UUID roomId) { this.roomId = roomId; }
     public String getJoinCode() { return roomKey; }
-    public void setJoinCode(String v) { roomKey = v; }
+    public void setJoinCode(String joinCode) { this.roomKey = joinCode; }
     public UUID getHostPlayerId() { return hostPlayerId; }
-    public void setHostPlayerId(UUID v) { hostPlayerId = v; }
+    public void setHostPlayerId(UUID hostPlayerId) { this.hostPlayerId = hostPlayerId; }
     public UUID getGuestPlayerId() { return guestPlayerId; }
-    public void setGuestPlayerId(UUID v) { guestPlayerId = v; }
+    public void setGuestPlayerId(UUID guestPlayerId) { this.guestPlayerId = guestPlayerId; }
     public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant v) { createdAt = v; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }
