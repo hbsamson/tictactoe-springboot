@@ -226,13 +226,10 @@ public class GameServiceImpl implements GameService {
         if (game.getStatus() == GameStatus.DRAW) {
             playerX.setDraws(playerX.getDraws() + 1);
             playerO.setDraws(playerO.getDraws() + 1);
-            playerX.setPoints(playerX.getPoints() + 1);
-            playerO.setPoints(playerO.getPoints() + 1);
         } else {
             Leaderboard winner = game.getWinnerId().equals(playerX.getPlayerId()) ? playerX : playerO;
             Leaderboard loser = winner == playerX ? playerO : playerX;
             winner.setWins(winner.getWins() + 1);
-            winner.setPoints(winner.getPoints() + 3);
             loser.setLosses(loser.getLosses() + 1);
         }
         leaderboard.save(playerX);

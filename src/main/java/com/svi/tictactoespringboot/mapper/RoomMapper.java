@@ -6,12 +6,12 @@ import org.springframework.stereotype.Component;
 
 @Component 
 public class RoomMapper { 
-    public RoomResponse toResponse(Room room) { 
+    public RoomResponse toResponse(Room room) {
         return new RoomResponse(
                 room.getRoomId(),
                 room.getJoinCode(),
                 room.getHostPlayerId(),
-                room.getGuestPlayerId(), 
+                room.getGuestPlayerId(),
                 room.getCreatedAt()); 
     } 
 }
